@@ -73,8 +73,8 @@ jobs:
 
             - name: Build Frontend
               run: |
-                  npm --prefix frontend install
-                  npm --prefix frontend run build
+                  yarn workspace ui install
+                  yarn workspace ui run build
             - name: CompressFiles
               uses: stefh/ghaction-CompressFiles@v2
               with:
