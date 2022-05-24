@@ -1,5 +1,6 @@
 const request = require("supertest");
 const app = require("./server");
+
 const response = request(app);
 
 describe("Backend Tests", () => {
@@ -20,4 +21,4 @@ describe("Backend Tests", () => {
 			expect(res.statusCode).toBe(200);
 		});
 	});
-})
+});

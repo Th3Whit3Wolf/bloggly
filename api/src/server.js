@@ -1,13 +1,12 @@
-const express = require('express')
-const helmet = require('helmet');
-const session = require('express-session');
-const actuator = require('express-actuator')
-const cookieParser = require('cookie-parser')
+const express = require("express");
+const helmet = require("helmet");
+const session = require("express-session");
+const actuator = require("express-actuator");
+const cookieParser = require("cookie-parser");
 
-const expressPino = require('express-pino-logger');
-const cors = require('cors');
-const { logger } =  require("./config");
-
+const expressPino = require("express-pino-logger");
+const cors = require("cors");
+const { logger } = require("./config");
 
 const secret = process.env.SESSION_SECRET || "weak sauce secret";
 const NODE_ENV = process.env.NODE_ENV || "development";

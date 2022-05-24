@@ -1,13 +1,13 @@
-const { PrismaClient } = require('@prisma/client')
+const { PrismaClient } = require("@prisma/client");
+const http = require("http");
+const { createTerminus } = require("@godaddy/terminus");
 const app = require("./server");
-const { logger } =  require("./config");
-const http = require('http');
-const { createTerminus } = require('@godaddy/terminus');
+const { logger } = require("./config");
 
 const port = process.env.PORT || 8081;
 const NODE_ENV = process.env.NODE_ENV || "development";
 const server = http.createServer(app);
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 const onListening = () => {
 	logger.info({
@@ -20,7 +20,8 @@ const onListening = () => {
 const onSignal = async () => {
 	logger.info("Server is starting cleanup");
 
-	prisma.$disconnect()
+	prisma
+		.$disconnect()
 		.then(() => logger.info("database disconnected"))
 		.catch(err => logger.error({ err, msg: "error during disconnection" }));
 };
