@@ -3,70 +3,70 @@ name: CI/CD for Main branch's API
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
-  push:
-    branches: [main]
-    paths:
-      - "api/**"
-  pull_request:
-    branches: [main]
-    paths:
-      - "api/**"
+    # Triggers the workflow on push or pull request events but only for the main branch
+    push:
+        branches: [main]
+        paths:
+            - "api/**"
+    pull_request:
+        branches: [main]
+        paths:
+            - "api/**"
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+    # Allows you to run this workflow manually from the Actions tab
+    workflow_dispatch:
 
 # 'jobs' is the list of all the workflows that will kick off.
 jobs:
-  # This workflow kicks off the build and test for the API
-  build-and-test:
-    name: Build and Test API
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Build API
-        run: |
-          docker build -f ./api.Dockerfile -t bloggly-api .
-      - name: Test API
-        run: |
-          docker run -e CI=true bloggly-api yarn run test
+    # This workflow kicks off the build and test for the API
+    build-and-test:
+        name: Build and Test API
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - name: Build API
+              run: |
+                  docker build -f ./api.Dockerfile -t bloggly-api .
+            - name: Test API
+              run: |
+                  docker run -e CI=true bloggly-api yarn run test
 
-  # This workflow kicks off the linter for your API.
-  lint:
-    name: Lint API Code Base
-    runs-on: ubuntu-latest
+    # This workflow kicks off the linter for your API.
+    lint:
+        name: Lint API Code Base
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-        with:
-          # Full git history is needed to get a proper list of changed files
-          fetch-depth: 0
-      # Installs dependencies on the runner for API
-      - name: Install linter options
-        run: yarn workspace api install
-      # Executes the linter on the API code base.
-      - name: Run Linter
-        run: yarn workspace api run lint
+        steps:
+            - name: Checkout Code
+              uses: actions/checkout@v3
+              with:
+                  # Full git history is needed to get a proper list of changed files
+                  fetch-depth: 0
+            # Installs dependencies on the runner for API
+            - name: Install linter options
+              run: yarn workspace api install
+            # Executes the linter on the API code base.
+            - name: Run Linter
+              run: yarn workspace api run lint
 
-  # This workflow kicks off the deployment to Heroku for the API
-  deploy:
-    name: Deploy API to Heroku
-    # Needs specifies the steps that must previously complete in order to deploy your application.
-    needs: [lint, build-and-test]
-    # Only deploy after merge with main
-    if: github.event_name == 'push'
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    # This workflow kicks off the deployment to Heroku for the API
+    deploy:
+        name: Deploy API to Heroku
+        # Needs specifies the steps that must previously complete in order to deploy your application.
+        needs: [lint, build-and-test]
+        # Only deploy after merge with main
+        if: github.event_name == 'push'
+        # The type of runner that the job will run on
+        runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
-      - uses: akhileshns/heroku-deploy@v3.12.12
-        with:
-          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-          heroku_app_name: "bloggly-api"
-          heroku_email: "dkarrick2@gmail.com"
-          appdir: "api/"
-          usedocker: true
+        # Steps represent a sequence of tasks that will be executed as part of the job
+        steps:
+            # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+            - uses: actions/checkout@v3
+            - uses: akhileshns/heroku-deploy@v3.12.12
+              with:
+                  heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+                  heroku_app_name: "bloggly-api"
+                  heroku_email: "dkarrick2@gmail.com"
+                  appdir: "api/"
+                  branch: main
