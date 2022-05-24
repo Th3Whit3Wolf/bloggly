@@ -42,7 +42,7 @@ app.use(log);
 if (NODE_ENV === "production") {
 	app.use(
 		cors({
-			origin: "https://bsdi1-voyager-frontend.herokuapp.com",
+			origin: "https://bloggly-ui.herokuapp.com/",
 			allowedHeaders:
 				"Origin, X-Requested-With, Content-Type, Accept, Authorization",
 			methods: ["GET", "PUT", "POST", "DELETE"]
