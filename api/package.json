@@ -1,0 +1,126 @@
+{
+	"name": "api",
+	"version": "0.1.0",
+	"description": "Api for bloggly",
+	"main": "src/index.js",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Th3Whit3Wolf/bloggly.git"
+	},
+	"author": "Th3Whit3Wolf <the.white.wolf.is.1337@gmail.com>",
+	"license": "MIT",
+	"prisma": {
+		"seed": "node prisma/seeds/index.js"
+	},
+	"scripts": {
+		"db:addMigration": "prisma migrate dev --name",
+		"db:seed": "prisma db seed",
+		"db:testMigration": "prisma db push",
+		"db:reset": "prisma migrate reset",
+		"db:view": "prisma studio",
+		"db:gen": "prisma generate",
+		"db:introspect": "prisma db pull",
+		"dev": "nodemon src",
+		"lint": "npx eslint src",
+		"lint:fix": "npm run lint -- --fix",
+		"prettier": "npx prettier src --check",
+		"prettier:fix": "npm run prettier -- --write",
+		"format": "npm run prettier:fix && npm run lint:fix",
+		"start": "node src",
+		"test": "NODE_ENV=test npx jest",
+		"heroku-postbuild": "npm run db:testMigration"
+	},
+	"dependencies": {
+		"@godaddy/terminus": "^4.10.2",
+		"@prisma/client": "^3.14.0",
+		"cookie-parser": "^1.4.6",
+		"cors": "^2.8.5",
+		"express": "^4.17.3",
+		"express-actuator": "^1.8.1",
+		"express-pino-logger": "^7.0.0",
+		"express-session": "^1.17.3",
+		"helmet": "^5.0.2",
+		"nodemon": "^2.0.15",
+		"pino": "^7.11.0",
+		"pino-pretty": "^7.6.1",
+		"prisma": "^3.14.0"
+	},
+	"devDependencies": {
+		"eslint": "^8.13.0",
+		"eslint-config-airbnb-base": "^15.0.0",
+		"eslint-config-prettier": "^8.5.0",
+		"eslint-plugin-prettier": "^4.0.0",
+		"jest": "^27.5.1",
+		"prettier": "^2.6.2",
+		"prettier-eslint": "^14.0.2",
+		"supertest": "^6.2.2"
+	},
+	"eslintConfig": {
+		"env": {
+			"node": true,
+			"jest": true
+		},
+		"extends": [
+			"airbnb-base",
+			"prettier"
+		],
+		"plugins": [
+			"prettier"
+		],
+		"rules": {
+			"prettier/prettier": [
+				"warn"
+			],
+			"indent": [
+				2,
+				"tab",
+				{
+					"SwitchCase": 1,
+					"VariableDeclarator": 2,
+					"offsetTernaryExpressions": true,
+					"CallExpression": {
+						"arguments": "first"
+					},
+					"ObjectExpression": 1,
+					"flatTernaryExpressions": false
+				}
+			],
+			"multiline-ternary": [
+				2,
+				"always-multiline"
+			],
+			"radix": [
+				"error",
+				"as-needed"
+			],
+			"no-console": 0,
+			"no-tabs": [
+				0,
+				"error",
+				{
+					"allowIndentationTabs": true
+				}
+			],
+			"no-unused-vars": [
+				"error",
+				{
+					"args": "none"
+				}
+			]
+		},
+		"ignorePatterns": [
+			"node_modules"
+		]
+	},
+	"prettier": {
+		"arrowParens": "avoid",
+		"bracketSpacing": true,
+		"bracketSameLine": false,
+		"semi": true,
+		"singleQuote": false,
+		"trailingComma": "none",
+		"endOfLine": "lf",
+		"useTabs": true,
+		"tabWidth": 4
+	}
+}

@@ -1,0 +1,15 @@
+{
+  "name": "bloggly",
+  "packageManager": "yarn@3.2.1",
+  "private": true,
+  "workspaces": [
+    "api",
+    "ui"
+  ],
+  "scripts": {
+    "api": "yarn workspace api start",
+    "ui": "yarn workspace ui start",
+    "dev:api": "yarn workspace api run dev",
+    "dev:ui": "yarn workspace ui run dev"
+  }
+}
