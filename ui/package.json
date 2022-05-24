@@ -7,6 +7,7 @@
 		"type": "git",
 		"url": "git+https://github.com/Th3Whit3Wolf/bloggly.git"
 	},
+	"homepage": "https://bloggly-ui.herokuapp.com",
 	"author": "Th3Whit3Wolf <the.white.wolf.is.1337@gmail.com>",
 	"license": "MIT",
 	"scripts": {
