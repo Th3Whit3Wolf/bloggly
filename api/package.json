@@ -28,23 +28,24 @@
 		"format": "npm run prettier:fix && npm run lint:fix",
 		"start": "node src",
 		"test": "NODE_ENV=test npx jest",
-		"heroku-postbuild": "npm run db:testMigration"
+		"heroku-postbuild": "npm run db:gen && npm run db:reset -- --force"
 	},
 	"dependencies": {
 		"@godaddy/terminus": "^4.10.2",
 		"@prisma/client": "^3.14.0",
 		"cookie-parser": "^1.4.6",
+		"cookie-session": "^2.0.0",
 		"cors": "^2.8.5",
 		"express": "^4.17.3",
 		"express-actuator": "^1.8.1",
 		"express-pino-logger": "^7.0.0",
-		"express-session": "^1.17.3",
 		"hash-wasm": "^4.9.0",
 		"helmet": "^5.0.2",
 		"nodemon": "^2.0.15",
 		"pino": "^7.11.0",
 		"pino-pretty": "^7.6.1",
-		"prisma": "^3.14.0"
+		"prisma": "^3.14.0",
+		"uuid": "^8.3.2"
 	},
 	"devDependencies": {
 		"eslint": "^8.13.0",
