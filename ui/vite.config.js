@@ -9,13 +9,11 @@ export default defineConfig({
 		react(),
 		// For more information
 		// https://github.com/subwaytime/vite-aliases
-		// ViteAliases({ prefix: "#" }),
+		ViteAliases({ prefix: "#" }),
 		eslintPlugin()
 	],
 	optimizeDeps: {
 		auto: true,
-		exclude: [
-		'common'
-		]
+		exclude: ["common"]
 	}
 });

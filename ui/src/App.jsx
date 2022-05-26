@@ -1,43 +1,72 @@
-import { useState } from "react";
-import logo from "./logo.svg";
+import React, { useMemo, useState } from "react";
+import { Routes, Route } from "react-router-dom";
+
+import {
+	Box,
+	Toolbar,
+	createTheme,
+	CssBaseline,
+	ThemeProvider,
+	useMediaQuery
+} from "@mui/material";
+
+import { Header, SideBar } from "#Components";
+import { ColorModeContext, UserContext } from "#Context";
+import { Landing, Login, SignUp, PageNotFound } from "#Pages";
+import getDesignTokens from "./theme.js";
 
 function App() {
-	const [count, setCount] = useState(0);
+	const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
+	const [mode, setMode] = useState(prefersDarkMode ? "dark" : "light");
+	const [user, setUser] = useState({ isLoggedIn: false });
+	const colorMode = useMemo(
+		() => ({
+			// The dark mode switch would invoke this method
+			toggleColorMode: () => {
+				setMode(prevMode => (prevMode === "light" ? "dark" : "light"));
+			}
+		}),
+		[]
+	);
+	const theme = useMemo(() => createTheme(getDesignTokens(mode)), [mode]);
+	const usr = useMemo(() => ({ user, setUser }), [user]);
 
 	return (
-		<div className="App">
-			<header className="App-header">
-				<img src={logo} className="App-logo" alt="logo" />
-				<p>Hello Vite + React!</p>
-				<p>
-					<button type="button" onClick={() => setCount(c => c + 1)}>
-						count is: {count}
-					</button>
-				</p>
-				<p>
-					Edit <code>App.jsx</code> and save to test HMR updates.
-				</p>
-				<p>
-					<a
-						className="App-link"
-						href="https://reactjs.org"
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						Learn React
-					</a>
-					{" | "}
-					<a
-						className="App-link"
-						href="https://vitejs.dev/guide/features.html"
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						Vite Docs
-					</a>
-				</p>
-			</header>
-		</div>
+		<ColorModeContext.Provider value={colorMode}>
+			<UserContext.Provider value={usr}>
+				<ThemeProvider theme={theme}>
+					<Box sx={{ display: "flex" }}>
+						<CssBaseline />
+						<Header />
+						<SideBar />
+						<Routes>
+							<Route path="/" element={<Landing />} />
+							<Route
+								path="/login"
+								element={
+									<Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+										<Toolbar />
+										<Toolbar />
+										<Login />
+									</Box>
+								}
+							/>
+							<Route
+								path="/signup"
+								element={
+									<Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+										<Toolbar />
+										<Toolbar />
+										<SignUp />
+									</Box>
+								}
+							/>
+							<Route path="*" element={<PageNotFound />} />
+						</Routes>
+					</Box>
+				</ThemeProvider>
+			</UserContext.Provider>
+		</ColorModeContext.Provider>
 	);
 }
 

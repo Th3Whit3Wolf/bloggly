@@ -3,10 +3,11 @@ const helmet = require("helmet");
 const session = require("express-session");
 const actuator = require("express-actuator");
 const cookieParser = require("cookie-parser");
-
 const expressPino = require("express-pino-logger");
 const cors = require("cors");
+
 const { logger } = require("./config");
+const routes = require("./routes");
 
 const secret = process.env.SESSION_SECRET || "weak sauce secret";
 const NODE_ENV = process.env.NODE_ENV || "development";
@@ -82,6 +83,11 @@ app.get("/", (req, res) => {
 	res.send(
 		'Did you mean to go to "https://bsdi1-voyager-frontend.herokuapp.com/"'
 	);
+});
+
+// Read all exported routes and use them
+Object.keys(routes).forEach(route => {
+	app.use("/api/v1/", routes[route]);
 });
 
 module.exports = app;
