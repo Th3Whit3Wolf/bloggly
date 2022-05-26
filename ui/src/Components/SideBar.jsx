@@ -102,13 +102,13 @@ const SideBar = () => {
 			onMouseEnter={handleDrawerOpen}
 			onMouseLeave={handleDrawerClose}
 			sx={{
-				display: location.pathname !== "/dashboard" ? "none" : "block"
+				display: user.isLoggedIn ? "block" : "none"
 			}}
 		>
 			<Toolbar />
 			<Toolbar />
 			<Box sx={{ overflow: "hidden" }}>
-				{user?.isLoggedIn &&
+				{user.isLoggedIn &&
 					SideBarItems.map(item => (
 						<List key={item.text} disablePadding>
 							<ListItemButton
