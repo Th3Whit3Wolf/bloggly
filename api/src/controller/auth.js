@@ -74,7 +74,7 @@ class AuthController {
 
 		try {
 			const passwd = await hash(password);
-			const newUser = await db.User.create({
+			const newUser = await this.dbResource.create({
 				data: { firstName, lastName, username, password: passwd }
 			});
 
@@ -144,14 +144,8 @@ class AuthController {
 
 	// eslint-disable-next-line class-methods-use-this
 	async logout(req, res) {
-		req.session.destroy(err => {
-			if (err) {
-				return res
-					.status(500)
-					.json({ message: "unable to log out user" });
-			}
-			return res.status(200).json({ message: "user log out successful" });
-		});
+		req.session = null;
+		return res.status(200).json({ message: "user log out successful" });
 	}
 }
 

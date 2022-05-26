@@ -1,7 +1,9 @@
 const isAuthenticated = async (req, res, next) => {
 	req.log.info("Check if request is authorized");
 
-	if (!req?.session === undefined || !req.session.loggedin) {
+	console.log("Session ", req.session);
+
+	if (!req?.session === undefined) {
 		req.log.error(
 			`Unautheticated user attempting to access ${req.originalUrl}`
 		);
@@ -9,6 +11,8 @@ const isAuthenticated = async (req, res, next) => {
 			error: "You are not authorized to make this request"
 		});
 	}
+	console.log("Session ", req.session);
+
 	req.log.info(`User (${req.session.username}): Logged In Successfully.`);
 	return next();
 };
