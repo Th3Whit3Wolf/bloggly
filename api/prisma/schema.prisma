@@ -17,6 +17,7 @@ model User {
   username  String @unique @db.VarChar(128)
   password  String
 
+
   /// Define One-to-Many relationship with Post
   posts Post[]
 
@@ -35,6 +36,9 @@ model Post {
 
   title   String @db.VarChar(255)
   content String
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
   /// Rename table to posts to conform to
   /// SQL naming conventions
