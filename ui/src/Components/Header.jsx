@@ -1,9 +1,8 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import logo from "../logo.svg";
 import { UserContext, ColorModeContext } from "#Context";
 import {
 	Button,
-	Link,
 	AppBar,
 	Box,
 	Toolbar,
@@ -16,7 +15,6 @@ import {
 	Brightness7 as Brightness7Icon
 } from "@mui/icons-material";
 import { NavLink, useNavigate } from "react-router-dom";
-import { borderColor } from "@mui/system";
 // Also need a small title shows USER or ADMIN
 
 const Header = () => {
@@ -33,6 +31,7 @@ const Header = () => {
 				: "http://localhost:8081/api/v1/logout"
 		).then(res => {
 			if (res.ok()) {
+				setUser({ isLoggedIn: false });
 				navigate("/");
 			}
 		});
@@ -197,4 +196,4 @@ const Header = () => {
 	);
 };
 
-export { Header };
+export default Header;
