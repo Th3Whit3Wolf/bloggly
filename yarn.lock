@@ -2956,6 +2956,7 @@ __metadata:
     express-actuator: ^1.8.1
     express-pino-logger: ^7.0.0
     express-session: ^1.17.3
+    hash-wasm: ^4.9.0
     helmet: ^5.0.2
     jest: ^27.5.1
     nodemon: ^2.0.15
@@ -3389,6 +3390,8 @@ __metadata:
 "bloggly@workspace:.":
   version: 0.0.0-use.local
   resolution: "bloggly@workspace:."
+  dependencies:
+    esbuild: ^0.14.39
   languageName: unknown
   linkType: soft
 
@@ -4799,7 +4802,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild@npm:^0.14.27":
+"esbuild@npm:^0.14.27, esbuild@npm:^0.14.39":
   version: 0.14.39
   resolution: "esbuild@npm:0.14.39"
   dependencies:
@@ -6042,6 +6045,13 @@ __metadata:
   dependencies:
     function-bind: ^1.1.1
   checksum: b9ad53d53be4af90ce5d1c38331e712522417d017d5ef1ebd0507e07c2fbad8686fffb8e12ddecd4c39ca9b9b47431afbb975b8abf7f3c3b82c98e9aad052792
+  languageName: node
+  linkType: hard
+
+"hash-wasm@npm:^4.9.0":
+  version: 4.9.0
+  resolution: "hash-wasm@npm:4.9.0"
+  checksum: b8734247fb7f69941f6564179dd891b7de21aa5877b9e32a5c6d777c2ab45cf5a6b021ade2b0156ec780ac41188486d571d9d526ef8206dda1ad306c81112a8a
   languageName: node
   linkType: hard
 

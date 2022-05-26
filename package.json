@@ -11,5 +11,8 @@
     "ui": "yarn workspace ui start",
     "dev:api": "yarn workspace api run dev",
     "dev:ui": "yarn workspace ui run dev"
+  },
+  "devDependencies": {
+    "esbuild": "^0.14.39"
   }
 }
