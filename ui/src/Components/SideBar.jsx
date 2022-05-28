@@ -11,7 +11,7 @@ import {
 	ListItemText
 } from "@mui/material";
 
-import { Message as MessageIcon } from "@mui/icons-material";
+import { Message as MessageIcon, Home as HomeIcon } from "@mui/icons-material";
 
 import { UserContext } from "#Context";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -57,6 +57,11 @@ const closedMixin = thm => ({
 });
 
 const SideBarItems = [
+	{
+		icon: <HomeIcon />,
+		path: "/user",
+		text: "Home"
+	},
 	{
 		icon: <MessageIcon />,
 		path: "/blogs",
