@@ -23,16 +23,20 @@ import {
 } from "@mui/icons-material";
 
 import { UserContext } from "#Context";
-
+import { Notification } from "#Components";
 const LoginForm = () => {
 	const { user, setUser } = useContext(UserContext);
 	const theme = useTheme();
-
+	const [notif, setNotif] = useState({});
 	const [values, setValues] = useState({
 		username: "",
 		password: "",
 		showPassword: false
 	});
+
+	const notifClose = () => {
+		setNotif({});
+	};
 
 	const handleChange = prop => event => {
 		setValues({ ...values, [prop]: event.target.value });
@@ -67,22 +71,63 @@ const LoginForm = () => {
 					"Content-Type": "application/json"
 				}
 			}
-		).then(res => {
-			if (res.ok) {
-				console.log("Logged in");
-				if (!user.isLoggedIn) {
-					setUser({ ...user, isLoggedIn: true });
+		)
+			.then(res => {
+				if (res.ok) {
+					res.json().then(data => {
+						setUser({
+							...user,
+							isLoggedIn: true,
+							posts: [],
+							info: { ...data }
+						});
+					});
+				} else {
+					res.json().then(data => {
+						/*
+						 * On error data respone will be some variation of:
+						 * {
+						 *  	err: "No Password",
+						 *		message: "please enter a valid password"
+						 * }
+						 */
+						/// On error data respone will be some variation of:
+						/// { message: "unable to authenticate user" }
+						setNotif({
+							title: data.err,
+							message: data.message,
+							severity: "err"
+						});
+					});
 				}
-			}
-			setValues({
-				...values,
-				username: "",
-				password: ""
+				setValues({
+					...values,
+					username: "",
+					password: ""
+				});
+			})
+			.catch(err => {
+				/// Handle error
+				console.error("Unexpected error occured durring login", err);
+				setNotif({
+					title: "Unexpected Error",
+					message: err,
+					show: true,
+					severity: "err"
+				});
 			});
-		});
 	};
 	return (
 		<>
+			{Object.keys(notif).length > 0 && (
+				<Notification
+					show
+					message={notif.message}
+					title={notif.title}
+					severity={notif.severity}
+					afterClose={notifClose}
+				/>
+			)}
 			<Box
 				sx={{
 					marginTop: 8,
