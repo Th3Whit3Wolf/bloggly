@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 import {
 	Box,
@@ -10,7 +10,7 @@ import {
 	useMediaQuery
 } from "@mui/material";
 
-import { Header, SideBar } from "#Components";
+import { Header, SideBar, AllPosts } from "#Components";
 import { ColorModeContext, UserContext } from "#Context";
 import { Landing, Login, SignUp, PageNotFound } from "#Pages";
 import getDesignTokens from "./theme.js";
@@ -40,25 +40,60 @@ function App() {
 						<Header />
 						<SideBar />
 						<Routes>
-							<Route path="/" element={<Landing />} />
+							<Route
+								path="/usr"
+								element={
+									!user.isLoggedIn ? (
+										<Navigate to="/login" replace={true} />
+									) : (
+										<Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+											<Toolbar />
+											<Toolbar />
+											<AllPosts />
+										</Box>
+									)
+								}
+							/>
+							<Route
+								path="/"
+								element={
+									user.isLoggedIn ? (
+										<Navigate to="/user" replace={true} />
+									) : (
+										<Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+											<Toolbar />
+											<Toolbar />
+											<Landing />
+										</Box>
+									)
+								}
+							/>
 							<Route
 								path="/login"
 								element={
-									<Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-										<Toolbar />
-										<Toolbar />
-										<Login />
-									</Box>
+									user.isLoggedIn ? (
+										<Navigate to="/user" replace={true} />
+									) : (
+										<Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+											<Toolbar />
+											<Toolbar />
+											<Login />
+										</Box>
+									)
 								}
 							/>
 							<Route
 								path="/signup"
 								element={
-									<Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-										<Toolbar />
-										<Toolbar />
-										<SignUp />
-									</Box>
+									user.isLoggedIn ? (
+										<Navigate to="/user" replace={true} />
+									) : (
+										<Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+											<Toolbar />
+											<Toolbar />
+											<SignUp />
+										</Box>
+									)
 								}
 							/>
 							<Route path="*" element={<PageNotFound />} />
