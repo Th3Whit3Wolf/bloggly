@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import { useContext, forwardRef } from "react";
 import logo from "../logo.svg";
 import { UserContext, ColorModeContext } from "#Context";
 import {
@@ -8,14 +8,22 @@ import {
 	Toolbar,
 	useTheme,
 	Container,
-	Grid
+	Grid,
+	Typography
 } from "@mui/material";
 import {
 	Brightness2 as Brightness2Icon,
-	Brightness7 as Brightness7Icon
+	Brightness7 as Brightness7Icon,
+	AppRegistration as AppRegistrationIcon,
+	Login as LoginIcon,
+	Logout as LogoutIcon
 } from "@mui/icons-material";
 import { NavLink, useNavigate } from "react-router-dom";
 // Also need a small title shows USER or ADMIN
+
+const LinkBehavior = forwardRef((props, ref) => (
+	<NavLink ref={ref} to="/" {...props} role={undefined} />
+));
 
 const Header = () => {
 	const theme = useTheme();
@@ -30,18 +38,12 @@ const Header = () => {
 				? "https://bloggly-api.herokuapp.com/api/v1/logout"
 				: "http://localhost:8081/api/v1/logout"
 		).then(res => {
-			if (res.ok()) {
-				setUser({ isLoggedIn: false });
-				navigate("/");
+			if (res.ok) {
+				console.info("Successfully logged out");
 			}
 		});
 		setUser({ isLoggedIn: false });
 		navigate("/");
-	};
-
-	const handleLogin = e => {
-		e.preventDefault();
-		navigate("/login");
 	};
 
 	const handleSignUp = e => {
@@ -63,7 +65,7 @@ const Header = () => {
 			}}
 		>
 			<Toolbar disableGutters>
-				<NavLink to="/">
+				<Button component={LinkBehavior} sx={{ border: 0 }}>
 					<Box
 						disableGutters
 						component="img"
@@ -77,7 +79,7 @@ const Header = () => {
 						src={logo}
 						alt="Space Force Logo"
 					/>
-				</NavLink>
+				</Button>
 
 				<Container disableGutters>
 					<h1
@@ -123,70 +125,86 @@ const Header = () => {
 								variant="contained"
 								sx={{
 									mt: "0.25rem",
-									ml: "0.5rem",
-									borderWidth: "2px",
+
 									borderRadius: "12px",
+									borderColor: theme.palette.gsb.primary,
 									backgroundColor: theme.palette.gsb.primary,
 									flexShrink: 0
 								}}
 								onClick={toggleColorMode}
+								aria-label={
+									theme.palette.mode === "light"
+										? "switch to dark mode"
+										: "switch to light mode"
+								}
 								data-testid="themeToggleButton"
 							>
 								{theme.palette.mode === "light" ? (
-									<Brightness7Icon />
+									<Brightness7Icon fontSize="small" />
 								) : (
-									<Brightness2Icon />
+									<Brightness2Icon fontSize="small" />
 								)}
 							</Button>
 							{(user?.isLoggedIn && (
 								<Button
 									variant="contained"
 									onClick={handleLogOut}
+									aria-label="lot out"
 									data-testid="logoutButton"
+									startIcon={<LogoutIcon />}
 									sx={{
 										mt: "0.25rem",
-										ml: "0.5rem",
-										borderWidth: "2px",
+										ml: "0.75rem",
+										width: "90px",
 										borderRadius: "12px",
+										borderColor: theme.palette.gsb.primary,
 										backgroundColor: theme.palette.gsb.primary,
-										flexShrink: 0
+										flexShrink: 0,
+										textTransform: "none"
 									}}
 								>
-									Logout
+									<Typography variant="p" sx={{ p: 0 }}>
+										Log Out
+									</Typography>
 								</Button>
 							)) || (
 								<>
 									<Button
 										variant="contained"
-										onClick={handleLogin}
+										aria-label="log in"
 										data-testid="loginButton"
+										component={LinkBehavior}
+										to="/login"
+										startIcon={<LoginIcon />}
 										sx={{
 											mt: "0.25rem",
-											ml: "0.5rem",
-											borderWidth: "2px",
+											ml: "0.75rem",
 											borderRadius: "12px",
+											borderColor: theme.palette.gsb.primary,
 											backgroundColor: theme.palette.gsb.primary,
 											flexShrink: 0
 										}}
 									>
-										Log In
+										<Typography variant="body2">Log In</Typography>
 									</Button>
 									<Button
-										variant="Sign Up"
-										onClick={handleSignUp}
+										variant="outlined"
+										aria-label="sign up"
 										data-testid="signupButton"
+										component={LinkBehavior}
+										to="/signup"
+										startIcon={<AppRegistrationIcon />}
 										sx={{
 											mt: "0.25rem",
-											ml: "0.5rem",
+											ml: "0.75rem",
+											p: "6px 16px",
 											color: theme.palette.gsb.primary,
-											borderWidth: "2px",
-											borderStyle: "solid",
 											borderRadius: "12px",
 											borderColor: theme.palette.gsb.primary,
 											flexShrink: 0
 										}}
 									>
-										Sign Up
+										<Typography variant="body2">Sign Up</Typography>
 									</Button>
 								</>
 							)}
