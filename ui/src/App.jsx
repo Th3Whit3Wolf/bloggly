@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 
 import {
 	Box,
@@ -39,65 +39,66 @@ function App() {
 						<CssBaseline />
 						<Header />
 						<SideBar />
-						<Routes>
-							<Route
-								path="/usr"
-								element={
-									!user.isLoggedIn ? (
-										<Navigate to="/login" replace={true} />
-									) : (
-										<Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-											<Toolbar />
-											<Toolbar />
-											<AllPosts />
-										</Box>
-									)
-								}
-							/>
-							<Route
-								path="/"
-								element={
-									user.isLoggedIn ? (
-										<Navigate to="/user" replace={true} />
-									) : (
-										<Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-											<Toolbar />
-											<Toolbar />
+						<Box component="main" sx={{ flexGrow: 1, p: 0 }}>
+							<Toolbar />
+							<Toolbar />
+
+							<Routes>
+								<Route
+									path="/user"
+									element={
+										!user.isLoggedIn ? (
+											<Navigate to="/login" replace={true} />
+										) : (
+											<Outlet />
+										)
+									}
+								>
+									<Route
+										path="posts"
+										element={
+											!user.isLoggedIn ? (
+												<Navigate to="/login" replace={true} />
+											) : (
+												<AllPosts />
+											)
+										}
+									/>
+									<Route path="post/:id" element={<></>} />
+								</Route>
+								<Route
+									path="/"
+									element={
+										user.isLoggedIn ? (
+											<Navigate to="/user" replace={true} />
+										) : (
 											<Landing />
-										</Box>
-									)
-								}
-							/>
-							<Route
-								path="/login"
-								element={
-									user.isLoggedIn ? (
-										<Navigate to="/user" replace={true} />
-									) : (
-										<Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-											<Toolbar />
-											<Toolbar />
+										)
+									}
+								/>
+								<Route
+									path="/login"
+									element={
+										user.isLoggedIn ? (
+											<Navigate to="/user" replace={true} />
+										) : (
 											<Login />
-										</Box>
-									)
-								}
-							/>
-							<Route
-								path="/signup"
-								element={
-									user.isLoggedIn ? (
-										<Navigate to="/user" replace={true} />
-									) : (
-										<Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-											<Toolbar />
-											<Toolbar />
+										)
+									}
+								/>
+								<Route
+									path="/signup"
+									element={
+										user.isLoggedIn ? (
+											<Navigate to="/user" replace={true} />
+										) : (
 											<SignUp />
-										</Box>
-									)
-								}
-							/>
-							<Route path="*" element={<PageNotFound />} />
-						</Routes>
+										)
+									}
+								/>
+								<Route path="*" element={<PageNotFound />} />
+							</Routes>
+						</Box>
 					</Box>
 				</ThemeProvider>
 			</UserContext.Provider>
