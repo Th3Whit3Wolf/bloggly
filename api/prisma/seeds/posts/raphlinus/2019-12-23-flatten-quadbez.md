@@ -1,9 +1,10 @@
 ---
 layout: post
-title:  "Flattening quadratic Béziers"
-date:   2019-12-23 11:05:42 -0800
+title: "Flattening quadratic Béziers"
+date: 2019-12-23 11:05:42 -0800
 categories: [graphics, curves]
 ---
+
 <style>
   svg {
     touch-action: none;
@@ -18,7 +19,7 @@ categories: [graphics, curves]
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
-A classic approach to rendering Bézier curves is to *flatten* them to polylines. There are other possibilities, including working with the Bézier curves analytically, as is done for example in [Random Access Vector Graphics], but converting to polylines still has legs, largely because it's easier to build later stages of a rendering pipeline (especially on a GPU) that work with polylines.
+A classic approach to rendering Bézier curves is to _flatten_ them to polylines. There are other possibilities, including working with the Bézier curves analytically, as is done for example in [Random Access Vector Graphics], but converting to polylines still has legs, largely because it's easier to build later stages of a rendering pipeline (especially on a GPU) that work with polylines.
 
 A similarly classic approach to flattening Béziers to polylines is recursive subdivision. Briefly stated, the algorithm measures the error between the chord connecting the endpoints and the curve. If this is within tolerance, it returns the chord. Otherwise, it splits the Bézier in half (using de Casteljau subdivision) and recursively applies the algorithm to the two halves. This process is described in more detail in the paper [Piecewise Linear Approximation]. However, there are several reasons to be dissatisfied with this approach. For one, while it's pretty good, it's not particularly close to optimum in the number of curve segments. Perhaps of greater concern to a modern audience, the recursive approach adapts poorly any form of parallel evaluation, including GPU and SIMD. Allocation is also difficult, as the approach doesn't tell you in advance how many subdivisions will be needed to achieve the specified tolerance.
 
@@ -71,10 +72,10 @@ img {
 const svgNS = "http://www.w3.org/2000/svg";
 
 class Point {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-    }
+constructor(x, y) {
+this.x = x;
+this.y = y;
+}
 
     lerp(p2, t) {
         return new Point(this.x + (p2.x - this.x) * t, this.y + (p2.y - this.y) * t);
@@ -83,31 +84,32 @@ class Point {
     dist(p2) {
         return Math.hypot(p2.x - this.x, p2.y - this.y);
     }
+
 }
 
 // Compute an approximation to int (1 + 4x^2) ^ -0.25 dx
 // This isn't especially good but will do.
 function approx_myint(x) {
-   const d = 0.67; 
-   return x / (1 - d + Math.pow(Math.pow(d, 4) + 0.25 * x * x, 0.25));
+const d = 0.67;
+return x / (1 - d + Math.pow(Math.pow(d, 4) + 0.25 _ x _ x, 0.25));
 }
 
 // Approximate the inverse of the function above.
 // This is better.
 function approx_inv_myint(x) {
-    const b = 0.39;
-    return x * (1 - b + Math.sqrt(b * b + 0.25 * x * x));
+const b = 0.39;
+return x _ (1 - b + Math.sqrt(b _ b + 0.25 _ x _ x));
 }
 
 class QuadBez {
-    constructor(x0, y0, x1, y1, x2, y2) {
-        this.x0 = x0;
-        this.y0 = y0;
-        this.x1 = x1;
-        this.y1 = y1;
-        this.x2 = x2;
-        this.y2 = y2;
-    }
+constructor(x0, y0, x1, y1, x2, y2) {
+this.x0 = x0;
+this.y0 = y0;
+this.x1 = x1;
+this.y1 = y1;
+this.x2 = x2;
+this.y2 = y2;
+}
 
     to_svg_path() {
         return `M${this.x0} ${this.y0} Q${this.x1} ${this.y1} ${this.x2} ${this.y2}`
@@ -209,15 +211,16 @@ class QuadBez {
         result.push(1);
         return result;
     }
+
 }
 
 //for (let i = 0; i < sub.length - 1; i++) {
-//    console.log(qb.subsegment(sub[i], sub[i + 1]).error());
+// console.log(qb.subsegment(sub[i], sub[i + 1]).error());
 //}
 
 class QuadUi {
-    constructor(id) {
-        this.root = document.getElementById(id);
+constructor(id) {
+this.root = document.getElementById(id);
 
         this.root.addEventListener("pointerdown", e => {
             this.root.setPointerCapture(e.pointerId);
@@ -429,7 +432,7 @@ class QuadUi {
             if (p == "") {
                 p = `M${xy.x} ${xy.y}`;
             } else {
-                p += `L${xy.x} ${xy.y}` 
+                p += `L${xy.x} ${xy.y}`
             }
         }
         this.polyline.setAttribute("d", p);
@@ -437,11 +440,11 @@ class QuadUi {
         this.type_label.textContent = this.method;
         this.thresh_label.textContent = `threshold: ${this.thresh}`;
     }
+
 }
 
 new QuadUi("s");
 </script>
-
 
 A few other discussions of the recursive subdivision idea are on [antigrain], [caffeineowl], and [Stack Overflow]. The latter thread also links to some other approaches. A common sentiment is "maybe we shouldn't subdivide exactly in half, but be smarter exactly where to subdivide." This blog post is basically about how to be smarter.
 
@@ -453,12 +456,11 @@ The core insight of this blog post is a closed-form analytic expression for the 
 
 For a small curve segment, the maximum distance between curve and chord can be approximated as $ \Delta y \approx \frac{1}{8}\kappa \Delta s^2 $. Here, $\kappa$ represents curvature, and we use $s$ to represent an infinitesimal distance, not to be confused with $t$ as commonly used to represent the parameter for the Bézier equation.
 
-![Diagram of error](/assets/chord_error.svg)
+![Diagram of error](https://raphlinus.github.io/assets/chord_error.svg)
 
 To simplify the presentation of the math here, we'll solve the basic parabola $y = x^2$, rather than more general quadratic Béziers. However, all quadratic Béziers are equivalent to a segment of this parabola, modulo rotation, translation, and scaling. The first two factors don't affect flattening, and the last can be taken into account by scaling the tolerance threshold. (For the curious, this transformation is `map_to_basic` in the [code] for this post.) Note that $x$ in this transformed version is a linear transform of $t$ in the source Bézier: it can be written $x = x_0 + t(x_1 - x_0)$.
 
 The basic parabola has nice, simple expressions of curvature and infinitesimal arclength in terms of the parameter $x$:
-
 
 $$
 \kappa = \frac{2}{(1 + 4x^2)^\frac{3}{2}}
@@ -492,7 +494,7 @@ $$
 \mbox{segments} =  \frac{1}{2\sqrt{\Delta y}} \int_{x_0}^{x_1} \frac{1}{\sqrt[4]{1 + 4x^2}} dx
 $$
 
-As it turns out, this integral has a closed form solution, thanks to [hypergeometric functions][Hypergeometric function], though we won't be making too much use of this fact; we'll be doing numerical approximations instead. (I've left out the constant and am making the natural assumption that $f(0) = 0$, as it's an odd function).
+As it turns out, this integral has a closed form solution, thanks to [hypergeometric functions][hypergeometric function], though we won't be making too much use of this fact; we'll be doing numerical approximations instead. (I've left out the constant and am making the natural assumption that $f(0) = 0$, as it's an odd function).
 
 $$
 f(x) = \int \frac{1}{\sqrt[4]{1 + 4x^2}} dx = x\; {}_2F_1\left(\tfrac{1}{4}, \tfrac{1}{2}; \tfrac{3}{2}; -4x^2\right)
@@ -502,7 +504,7 @@ But no matter how we evaluate this integral, here we have an expression that tel
 
 ### Actually subdividing
 
-Now we need to come up with $t$ values to know *where* to subdivide. Fortunately, given the mechanisms we've developed, this is fairly straightforward. I'll actually show the code, as it's probably clearer than trying to describe it in prose:
+Now we need to come up with $t$ values to know _where_ to subdivide. Fortunately, given the mechanisms we've developed, this is fairly straightforward. I'll actually show the code, as it's probably clearer than trying to describe it in prose:
 
 ```javascript
     my_subdiv(tol) {
@@ -527,7 +529,8 @@ Now we need to come up with $t$ values to know *where* to subdivide. Fortunately
         return result;
     }
 ```
-Essentially we're subdividing the interval in "count space" into $n$ equal parts, then evaluating the *inverse function* of the integral at each of those points. This loop could easily be evaluated in parallel, and, as we'll see below, the actual formula for the approximate inverse integral is quite simple.
+
+Essentially we're subdividing the interval in "count space" into $n$ equal parts, then evaluating the _inverse function_ of the integral at each of those points. This loop could easily be evaluated in parallel, and, as we'll see below, the actual formula for the approximate inverse integral is quite simple.
 
 ## Numerical techniques
 
@@ -538,7 +541,8 @@ f(x) \approx \frac{x}{0.33 + \sqrt[4]{0.67^4 + \frac{1}{4}x^2}}
 $$
 
 <!-- Todo: I'd like better images, these are screenshots from colab -->
-![Approximation of the integral](/assets/flatten_approx.png)
+
+![Approximation of the integral](https://raphlinus.github.io/assets/flatten_approx.png)
 
 Reading this graph is fairly intuitive; the slope is the rate at which subdivisions are needed. That's higher in the center of the graph where the curvature is highest.
 
@@ -548,7 +552,7 @@ $$
 f^{-1}(x) \approx x \left(0.61 + \sqrt{0.39^2 + \tfrac{1}{4}x^2}\right)
 $$
 
-![Approximation of the inverse of the integral](/assets/flatten_inverse_approx.png)
+![Approximation of the inverse of the integral](https://raphlinus.github.io/assets/flatten_inverse_approx.png)
 
 Essentially, the first approximation gives a direct and fairly accurate solution to determining the number of segments needed, and the second gives a direct and even more accurate solution to determining the $t$ parameter values for the subdivision, so that the error is evenly divided among all the segments.
 
@@ -564,17 +568,17 @@ Though the theory is perhaps a bit math-intensive, the code is refreshingly simp
 
 And of course, the fact that it can be evaluated in parallel, as well as predict the number of generated segments in advance, means that it's especially well suited for GPU. I'll very likely use this technique as I reboot [piet-metal], though I'll likely be exploring analytical approaches to rendering quadratic Béziers.
 
-**Update 2019-12-25:** Alan MacKinnon pointed me to Sederberg's [CAGD notes](https://scholarsarchive.byu.edu/cgi/viewcontent.cgi?article=1000&context=facpub#section.10.6), which has a simpler approach to the problem based on an error bound computed from the second derivative. This solution *is* quite well suited to parallel evaluation, and is easy to understand, but is less than optimum especially when the curvature varies a lot within the segment. Alan also pointed to a reference to Wang's method in the book "Pyramid Algorithms" by Ron Goldman. You can experiment with these by pressing the "s" or "w" key in the demo above.
+**Update 2019-12-25:** Alan MacKinnon pointed me to Sederberg's [CAGD notes](https://scholarsarchive.byu.edu/cgi/viewcontent.cgi?article=1000&context=facpub#section.10.6), which has a simpler approach to the problem based on an error bound computed from the second derivative. This solution _is_ quite well suited to parallel evaluation, and is easy to understand, but is less than optimum especially when the curvature varies a lot within the segment. Alan also pointed to a reference to Wang's method in the book "Pyramid Algorithms" by Ron Goldman. You can experiment with these by pressing the "s" or "w" key in the demo above.
 
-[Random Access Vector Graphics]: http://hhoppe.com/proj/ravg/
+[random access vector graphics]: http://hhoppe.com/proj/ravg/
 [caffeineowl]: http://www.caffeineowl.com/graphics/2d/vectorial/bezierintro.html
-[Piecewise Linear Approximation]: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.86.162&rep=rep1&type=pdf
+[piecewise linear approximation]: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.86.162&rep=rep1&type=pdf
 [antigrain]: https://web.archive.org/web/20190329074058/http://antigrain.com:80/research/adaptive_bezier/index.html
-[Stack Overflow]: https://stackoverflow.com/questions/9247564/convert-bezier-curve-to-polygonal-chain
-[Fast, Precise Flattening of Cubic Bézier Segment Offset Curves]: https://web.archive.org/web/20170911131001/http://cis.usouthal.edu/~hain/general/Publications/Bezier/Bezier%20Offset%20Curves.pdf
+[stack overflow]: https://stackoverflow.com/questions/9247564/convert-bezier-curve-to-polygonal-chain
+[fast, precise flattening of cubic bézier segment offset curves]: https://web.archive.org/web/20170911131001/http://cis.usouthal.edu/~hain/general/Publications/Bezier/Bezier%20Offset%20Curves.pdf
 [lyon]: https://docs.rs/lyon/0.4.1/lyon/Bézier/index.html#flattening
-[Precise Flattening of Cubic Bézier Segments]: https://pdfs.semanticscholar.org/8963/c06a92d6ca8868348b0930bbb800ff6e7920.pdf
+[precise flattening of cubic bézier segments]: https://pdfs.semanticscholar.org/8963/c06a92d6ca8868348b0930bbb800ff6e7920.pdf
 [code]: https://github.com/raphlinus/raphlinus.github.io/tree/master/_posts/2019-12-23-flatten-quadbez.md
-[Hypergeometric function]: https://en.wikipedia.org/wiki/Hypergeometric_function
+[hypergeometric function]: https://en.wikipedia.org/wiki/Hypergeometric_function
 [arclength]: https://raphlinus.github.io/curves/2018/12/28/bezier-arclength.html
 [piet-metal]: https://github.com/linebender/piet-metal

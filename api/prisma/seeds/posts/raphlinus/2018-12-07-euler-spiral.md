@@ -1,9 +1,10 @@
 ---
 layout: post
-title:  "Secrets of smooth Béziers revealed"
-date:   2018-12-07 22:42:42 -0700
+title: "Secrets of smooth Béziers revealed"
+date: 2018-12-07 22:42:42 -0700
 categories: [curves]
 ---
+
 I haven't posted here much lately, and I admit, it's because I've gotten sidetracked thinking about curves again. I did my [PhD thesis] on curves, so spent years thinking about them, then put that on hold for a while, aside from some work in [crunching font file sizes down].
 
 But a few weeks ago, Hrant Papazian [tweeted] at me a link to the paper on [κ-Curves], which is what Adobe uses in the "Curvature Tool" in Illustrator, and that rekindled my interest.
@@ -14,9 +15,9 @@ To me, one of the smoothest curves is the [Euler spiral]. And, indeed, choosing 
 
 But let's say you have an Euler spiral and want to convert it into the closest possible cubic Bézier segment. I gave such an optimization algorithm in Chapter 9 of my thesis, but it didn't give a tremendous amount of insight.
 
-A good way to visualize the process of Bézier optimization is to run it for *all* possible Euler spiral segments, within a certain parameter range. So I dusted off my thesis code, and came up with this image:
+A good way to visualize the process of Bézier optimization is to run it for _all_ possible Euler spiral segments, within a certain parameter range. So I dusted off my thesis code, and came up with this image:
 
-![optimized Euler spiral arm length map](/assets/euler_map.png)
+![optimized Euler spiral arm length map](https://raphlinus.github.io/assets/euler_map.png)
 
 The horizontal axis is the tangent angle on the left side, the vertical axis is the tangent angle on the right side, and color represents the armlength, brighter is longer (using the [viridis] colormap). It's not easy to explain, best to play with the [interactive visualization] instead. In that visualization, the accurate Euler spiral is plotted in red, the cubic Bézier on top in blue. Below that is a plot of curvature as a function of arclength.
 
@@ -34,12 +35,12 @@ One way of thinking about this exploration is that cubic Béziers have a large p
 
 Discuss on [lobste.rs](https://lobste.rs/s/up2aoc/secrets_smooth_beziers_revealed) or [Hacker News](https://news.ycombinator.com/item?id=18635700).
 
-[PhD thesis]: https://levien.com/phd/thesis.pdf
+[phd thesis]: https://levien.com/phd/thesis.pdf
 [crunching font file sizes down]: https://github.com/googlefonts/fontcrunch
 [tweeted]: https://twitter.com/hhpapazian/status/1061668526224637952
-[κ-Curves]: http://faculty.cs.tamu.edu/schaefer/research/kcurves.pdf
+[κ-curves]: http://faculty.cs.tamu.edu/schaefer/research/kcurves.pdf
 [interactive visualization]: https://levien.com/euler_explorer/
-[Euler spiral]: https://en.wikipedia.org/wiki/Euler_spiral
-[Spiro]: https://levien.com/spiro/
+[euler spiral]: https://en.wikipedia.org/wiki/Euler_spiral
+[spiro]: https://levien.com/spiro/
 [particle accelerator tracks]: https://mag.uchicago.edu/science-medicine/early-exposure
 [viridis]: https://bids.github.io/colormap/

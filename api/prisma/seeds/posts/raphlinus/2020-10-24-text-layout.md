@@ -1,10 +1,11 @@
 ---
 layout: post
-title:  "Text layout is a loose hierarchy of segmentation"
-date:   2020-10-26 07:09:42 -0700
+title: "Text layout is a loose hierarchy of segmentation"
+date: 2020-10-26 07:09:42 -0700
 categories: [text]
 ---
-I love text layout, and have been working with it in one form or other for over 35 years. Yet, knowledge about it is quite arcane. I don't believe there is a single place where it's all properly written down. I have some explanation for that: while basic text layout is very important for UI, games, and other contexts, a lot of the "professional" needs around text layout are embedded in *much* more complicated systems such as Microsoft Word or a modern Web browser.
+
+I love text layout, and have been working with it in one form or other for over 35 years. Yet, knowledge about it is quite arcane. I don't believe there is a single place where it's all properly written down. I have some explanation for that: while basic text layout is very important for UI, games, and other contexts, a lot of the "professional" needs around text layout are embedded in _much_ more complicated systems such as Microsoft Word or a modern Web browser.
 
 A complete account of text layout would be at least a small book. Since there's no way I can write that now, this blog post is a small step towards that – in particular, an attempt to describe the "big picture," using the conceptual framework of a "loose hierarchy." Essentially, a text layout engine breaks the input into finer and finer grains, then reassembles the results into a text layout object suitable for drawing, measurement, and hit testing.
 
@@ -14,34 +15,34 @@ The main hierarchy is concerned with laying out the entire paragraph as a single
 
 The hierarchy is: paragraph segmentation as the coarsest granularity, followed by rich text style and BiDi analysis, then itemization (coverage by font), then Unicode script, and shaping clusters as the finest.
 
-![diagram of layout hierarchy](/assets/layout_pyramid.svg)
+![diagram of layout hierarchy](https://raphlinus.github.io/assets/layout_pyramid.svg)
 
 ### Paragraph segmentation
 
 The coarsest, and also simplest, segmentation task is paragraph segmentation. Most of the time, paragraphs are simply separated by newline (U+000A) characters, though Unicode in its infinite wisdom specifies a number of code point sequences that function as paragraph separators in plain text:
 
-* U+000A LINE FEED
-* U+000B VERTICAL TAB
-* U+000C FORM FEED
-* U+000D CARRIAGE RETURN
-* U+000D U+000A (CR + LF)
-* U+0085 NEXT LINE
-* U+2008 LINE SEPARATOR
-* U+2009 PARAGRAPH SEPARATOR
+-   U+000A LINE FEED
+-   U+000B VERTICAL TAB
+-   U+000C FORM FEED
+-   U+000D CARRIAGE RETURN
+-   U+000D U+000A (CR + LF)
+-   U+0085 NEXT LINE
+-   U+2008 LINE SEPARATOR
+-   U+2009 PARAGRAPH SEPARATOR
 
 In rich text, paragraphs are usually indicated through markup rather than special characters, for example `<p>` or `<br>` in HTML. But in this post, as in most text layout APIs, we'll treat rich text as plain text + attribute spans.
 
 ### Rich text style
 
-A paragraph of rich text may contain *spans* that can affect formatting. In particular, choice of font, font weight, italic or no, and a number of other attributes can affect text layout. Thus, each paragraph is typically broken into a some number of *style runs,* so that within a run the style is consistent.
+A paragraph of rich text may contain _spans_ that can affect formatting. In particular, choice of font, font weight, italic or no, and a number of other attributes can affect text layout. Thus, each paragraph is typically broken into a some number of _style runs,_ so that within a run the style is consistent.
 
-Note that some style changes don't *necessarily* affect text layout. A classic example is color. Firefox, rather famously, does *not* define segmentation boundaries here for color changes. If a color boundary cuts a ligature, it uses fancy graphics techiques to render parts of the ligature in different color. But this is a subtle refinement and I think not required for basic text rendering. For more details, see [Text Rendering Hates You].
+Note that some style changes don't _necessarily_ affect text layout. A classic example is color. Firefox, rather famously, does _not_ define segmentation boundaries here for color changes. If a color boundary cuts a ligature, it uses fancy graphics techiques to render parts of the ligature in different color. But this is a subtle refinement and I think not required for basic text rendering. For more details, see [Text Rendering Hates You].
 
 ### Bidirectional analysis
 
 Completely separate from the style spans, a paragraph may in general contain both left-to-right and right-to-left text. The need for bidirectional (BiDi) text is certainly one of the things that makes text layout more complicated.
 
-Fortunately, this part of the stack is defined by a standard ([UAX #9]), and there are a number of good implementations. The interested reader is referred to [Unicode Bidirectional Algorithm basics]. The key takeaway here is that BiDi analysis is done on the plain text of the entire paragraph, and the result is a sequence of *level runs,* where the level of each run defines whether it is LTR or RTL.
+Fortunately, this part of the stack is defined by a standard ([UAX #9]), and there are a number of good implementations. The interested reader is referred to [Unicode Bidirectional Algorithm basics]. The key takeaway here is that BiDi analysis is done on the plain text of the entire paragraph, and the result is a sequence of _level runs,_ where the level of each run defines whether it is LTR or RTL.
 
 The level runs and the style runs are then merged, so that in subsequent stages each run is of a consistent style and directionality. As such, for the purpose of defining the hierarchy, the result of BiDi analysis could alternatively be considered an implicit or derived rich text span.
 
@@ -51,7 +52,7 @@ In addition to BiDi, which I consider a basic requirement, a more sophisticated 
 
 Itemization is the trickiest and least well specified part of the hierarchy. There is no standard for it, and no common implementation. Rather, each text layout engine deals with it in its own special way.
 
-Essentially, the result of itemization is to choose a single concrete font for a run, from a *font collection.* Generally a font collection consists of a main font (selected by font name from system fonts, or loaded as a custom asset), backed by a *fallback stack,* which are usually system fonts, but thanks to [Noto] it is possible to bundle a fallback font stack with an application, if you don't mind spending a few hundred megabytes for the assets.
+Essentially, the result of itemization is to choose a single concrete font for a run, from a _font collection._ Generally a font collection consists of a main font (selected by font name from system fonts, or loaded as a custom asset), backed by a _fallback stack,_ which are usually system fonts, but thanks to [Noto] it is possible to bundle a fallback font stack with an application, if you don't mind spending a few hundred megabytes for the assets.
 
 Why is it so tricky? A few reasons, which I'll touch on.
 
@@ -63,15 +64,15 @@ I believe a similar situation exists with the Arabic presentation forms; see [De
 
 Because of these tricky normalization and presentation issues, the most robust way to determine whether a font can render a string is to try it. This is how LibreOffice has worked for a while, and in 2015 [Chromium followed](https://lists.freedesktop.org/archives/harfbuzz/2015-October/005168.html). See also [Eliminating Simple Text](https://www.chromium.org/teams/layout-team/eliminating-simple-text) for more background on the Chromium text layout changes.
 
-*Another* whole class of complexity is emoji. A lot of emoji can be rendered with either [text or emoji presentation], and there are no hard and fast rules to pick one or the other. Generally the text presentation is in a symbol font, and the emoji presentation is in a separate color font. A particularly tough example is the smiling emoji, which began its encoding life as 0x01 in [Code page 437], the standard 8-bit character encoding of the original IBM PC, and is now U+263A in Unicode. However, the suggested default presentation is text, which won't do in a world which expects color. Apple on iOS unilaterally chose an emoji presentation, so many text stacks follow Apple's lead. (Incidentally, the most robust way to encode such emoji is to append a [variation selector] to pin down the presentation.)
+_Another_ whole class of complexity is emoji. A lot of emoji can be rendered with either [text or emoji presentation], and there are no hard and fast rules to pick one or the other. Generally the text presentation is in a symbol font, and the emoji presentation is in a separate color font. A particularly tough example is the smiling emoji, which began its encoding life as 0x01 in [Code page 437], the standard 8-bit character encoding of the original IBM PC, and is now U+263A in Unicode. However, the suggested default presentation is text, which won't do in a world which expects color. Apple on iOS unilaterally chose an emoji presentation, so many text stacks follow Apple's lead. (Incidentally, the most robust way to encode such emoji is to append a [variation selector] to pin down the presentation.)
 
 Another source of complexity when trying to write a cross-platform text layout engine is querying the system fonts. See [Font fallback deep dive] for more information about that.
 
-I should note one thing, which might help people doing archaeology of legacy text stacks: it used to be pretty common for text layout to resolve "compatibility" forms such as NFKC and NFKD, and this can lead to various problems. But today it is more common to solve that particular problem by providing a font stack with *massive* Unicode coverage, including all the code points in the relevant compatibility ranges.
+I should note one thing, which might help people doing archaeology of legacy text stacks: it used to be pretty common for text layout to resolve "compatibility" forms such as NFKC and NFKD, and this can lead to various problems. But today it is more common to solve that particular problem by providing a font stack with _massive_ Unicode coverage, including all the code points in the relevant compatibility ranges.
 
 ### Script
 
-The *shaping* of text, or the transformation of a sequence of code points into a sequence of positioned glyphs, depends on the script. Some scripts, such as Arabic and Devanagari, have extremely elaborate shaping rules, while others, such as Chinese, are a fairly straightforward mapping from code point into glyph. Latin is somewhere in the middle, starting with a straightforward mapping, but ligatures and kerning are also required for high quality text layout.
+The _shaping_ of text, or the transformation of a sequence of code points into a sequence of positioned glyphs, depends on the script. Some scripts, such as Arabic and Devanagari, have extremely elaborate shaping rules, while others, such as Chinese, are a fairly straightforward mapping from code point into glyph. Latin is somewhere in the middle, starting with a straightforward mapping, but ligatures and kerning are also required for high quality text layout.
 
 Determining script runs is reasonably straightforward - many characters have a Unicode script property which uniquely identifies which script they belong to. However, some characters, such as space, are "common," so the assigned script just continues the previous run.
 
@@ -79,19 +80,19 @@ A simple example is "hello мир". This string is broken into two script runs: 
 
 ### Shaping (cluster)
 
-At this point, we have a run of constant style, font, direction, and script. It is ready for *shaping.* Shaping is a complicated process that converts a string (sequence of Unicode code points) into positioned glyphs. For the purpose of this blog post, we can generally treat it as a black box. Fortunately, a very high quality open source implementation exists, in the form of HarfBuzz.
+At this point, we have a run of constant style, font, direction, and script. It is ready for _shaping._ Shaping is a complicated process that converts a string (sequence of Unicode code points) into positioned glyphs. For the purpose of this blog post, we can generally treat it as a black box. Fortunately, a very high quality open source implementation exists, in the form of HarfBuzz.
 
-We're not *quite* done with segmentation, though, as shaping assigns substrings in the input to [clusters] of glyphs. The correspondence depends a lot on the font. In Latin, the string "fi" is often shaped to a single glyph (a ligature). For complex scripts such as Devanagari, a cluster is most often a syllable in the source text, and complex reordering can happen within the cluster.
+We're not _quite_ done with segmentation, though, as shaping assigns substrings in the input to [clusters] of glyphs. The correspondence depends a lot on the font. In Latin, the string "fi" is often shaped to a single glyph (a ligature). For complex scripts such as Devanagari, a cluster is most often a syllable in the source text, and complex reordering can happen within the cluster.
 
-Clusters are important for *hit testing,* or determining the correspondence between a physical cursor position in the text layout and the offset within the text. Generally, they can be ignored if the text will only be rendered, not edited (or selected).
+Clusters are important for _hit testing,_ or determining the correspondence between a physical cursor position in the text layout and the offset within the text. Generally, they can be ignored if the text will only be rendered, not edited (or selected).
 
-Note that these shaping clusters are distinct from grapheme clusters. The "fi" example has two grapheme clusters but a single shaping cluster, so a grapheme cluster boundary can cut a shaping cluster. Since it's possible to move the cursor between the "f" and "i", one tricky problem is to determine the cursor location in that case. Fonts *do* have a [caret table], but implementation is spotty. A more robust solution is to portion the width of the cluster equally to each grapheme cluster within the cluster. See also [Let’s Stop Ascribing Meaning to Code Points] for a detailed dive into grapheme clusters.
+Note that these shaping clusters are distinct from grapheme clusters. The "fi" example has two grapheme clusters but a single shaping cluster, so a grapheme cluster boundary can cut a shaping cluster. Since it's possible to move the cursor between the "f" and "i", one tricky problem is to determine the cursor location in that case. Fonts _do_ have a [caret table], but implementation is spotty. A more robust solution is to portion the width of the cluster equally to each grapheme cluster within the cluster. See also [Let’s Stop Ascribing Meaning to Code Points] for a detailed dive into grapheme clusters.
 
 ## Line breaking
 
 While short strings can be considered a single strip, longer strings require breaking into lines. Doing this properly is quite a tricky problem. In this post, we treat it as a separate (small) hierarchy, parallel to the main text layout hierarchy above.
 
-The problem can be factored into identifying line break *candidates*, then choosing a subset of those candidates as line breaks that satisfy the layout constraints. The main constraint is that lines should fit within the specified maximum width. It's common to use a greedy algorithm, but high end typography tends to use an algorithm that minimizes a raggedness score for the paragraph. Knuth and Plass have a famous paper, [Breaking Paragraphs into Lines], that describes the algorithm used in TeX in detail. But we'll focus on the problems of determining candidates and measuring the widths, as these are tricky enough.
+The problem can be factored into identifying line break _candidates_, then choosing a subset of those candidates as line breaks that satisfy the layout constraints. The main constraint is that lines should fit within the specified maximum width. It's common to use a greedy algorithm, but high end typography tends to use an algorithm that minimizes a raggedness score for the paragraph. Knuth and Plass have a famous paper, [Breaking Paragraphs into Lines], that describes the algorithm used in TeX in detail. But we'll focus on the problems of determining candidates and measuring the widths, as these are tricky enough.
 
 In theory, the Unicode Line Breaking Algorithm ([UAX #14]) identifies positions in a string that are candidate line breaks. In practice, there are some additional subtleties. For one, some languages (Thai is the most common) don't use spaces to divide words, so need some kind of natural language processing (based on a dictionary) to identify word boundaries. For two, automatic [hyphenation] is often desirable, as it fills lines more efficiently and makes the right edge less ragged. Liang's algorithm is most common for automatically inferring "soft hyphens," and there are many good implementations of it.
 
@@ -113,13 +114,13 @@ Very few text layout engines even try to handle this general case, using various
 
 A great example of how line breaking can go wrong is [Firefox bug 479829], in which an "f + soft hyphen + f" sequence in the text is shaped as the "ff" ligature, then the line is broken at the soft hyphen. Because Firefox reuses the existing shaping rather than reshaping the line, it actually renders with the ligature glyph split across lines:
 
-![Example of layout bug in Firefox](/assets/bugff_lighyphen_minion.png)
+![Example of layout bug in Firefox](https://raphlinus.github.io/assets/bugff_lighyphen_minion.png)
 
 ## Implementations to study
 
 While I still feel a need for a solid, high-level, cross-platform text layout engine, there are good implementations to study. In open source, on of my favorites (though I am biased), is the Android text stack, based on [Minikin] for its lower levels. It is fairly capable and efficient, and also makes a concerted effort to get "all of Unicode" right, including emoji. It is also reasonably simple and the code is accessible.
 
-While not open source, [DirectWrite] is also well worth study, as it is without question one of the most capable engines, supporting Word and the previous iteration of Edge before it was abandonded in favor of Chromium. Note that there is a [proposal][DWriteCore proposal] for a cross-platform implementation and also potentially to take it open-source. If that were to happen, it would be something of a game changer.
+While not open source, [DirectWrite] is also well worth study, as it is without question one of the most capable engines, supporting Word and the previous iteration of Edge before it was abandonded in favor of Chromium. Note that there is a [proposal][dwritecore proposal] for a cross-platform implementation and also potentially to take it open-source. If that were to happen, it would be something of a game changer.
 
 Chromium and Firefox are a rich source as well, especially as they've driven a lot of the improvements in HarfBuzz. However, their text layout stacks are quite complex and do not have a clean, documented API boundary with the rest of the application, so they are not as suitable for study as the others I've chosen here.
 
@@ -143,7 +144,7 @@ Hit testing in DirectWrite is based on leading/trailing positions, while in Andr
 
 While Core Text (see below) exposes a hierarchy of objects, DirectWrite uses the [TextLayout](https://docs.microsoft.com/en-us/windows/win32/api/dwrite/nn-dwrite-idwritetextlayout) as the primary interface, and exposes internal structure (even including lines) by iterating over a callback per run in the confusingly named [Draw](https://docs.microsoft.com/en-us/windows/win32/api/dwrite/nf-dwrite-idwritetextlayout-draw) method. The granularity of this callback is a [glyph run](https://docs.microsoft.com/en-us/windows/win32/api/dwrite/ns-dwrite-dwrite_glyph_run), which corresponds to "script" in the hierarchy above. Cluster information is provided in an associated [glyph run description](https://docs.microsoft.com/en-us/windows/win32/api/dwrite/ns-dwrite-dwrite_glyph_run_description) structure.
 
-There are other ways to access lower level text layout capabilities, including 
+There are other ways to access lower level text layout capabilities, including
 [TextAnalyzer](https://docs.microsoft.com/en-us/windows/win32/api/dwrite/nn-dwrite-idwritetextanalyzer), which computes BiDi and line break opportunities, script runs, and shaping. In fact, the various methods on that interface represents much of the internal structure of the text layout engine. Itemization, however, is done in the [FontFallback](https://docs.microsoft.com/en-us/windows/win32/api/dwrite_2/nn-dwrite_2-idwritefontfallback) interface, which was added later.
 
 ### Core Text
@@ -154,7 +155,7 @@ When doing text layout on macOS, it's probably better to use the platform-provid
 
 ### Druid/Piet
 
-At this point, the Druid GUI toolkit does not have its own native text layout engine, but rather *does* provide a [cross-platform API][Piet text layout API] which is delegated to platform text layout engines, DirectWrite and Core Text in particular.
+At this point, the Druid GUI toolkit does not have its own native text layout engine, but rather _does_ provide a [cross-platform API][piet text layout api] which is delegated to platform text layout engines, DirectWrite and Core Text in particular.
 
 The situation on Linux is currently unsatisfactory, as it's based on the Cairo toy text API. There is work ongoing to improve this, but no promises when.
 
@@ -182,44 +183,44 @@ Another useful resources is [Modern text rendering with Linux: Overview], which 
 
 Thanks to Chris Morgan for review and examples.
 
-[DWriteCore proposal]: https://github.com/microsoft/ProjectReunion/issues/112
-[Text Rendering Hates You]: https://gankra.github.io/blah/text-hates-you/
-[Minikin]: https://android.googlesource.com/platform/frameworks/minikin/+/refs/heads/master/libs/minikin
-[DirectWrite]: https://docs.microsoft.com/en-us/windows/win32/directwrite/direct-write-portal
-[Core Text]: https://developer.apple.com/documentation/coretext
-[State of Text Rendering]: http://behdad.org/text/
-[Unicode Bidirectional Algorithm basics]: https://www.w3.org/International/articles/inline-bidi-markup/uba-basics
-[UAX #9]: http://www.unicode.org/reports/tr9/
-[SIGGRAPH 2018 - Digital Typography]: https://www.slideshare.net/NicolasRougier1/siggraph-2018-digital-typography
-[Noto]: https://www.google.com/get/noto/
-[Unicode normalization]: https://unicode.org/reports/tr15/
-[Unicode equivalence]: https://en.wikipedia.org/wiki/Unicode_equivalence
-[Character to Glyph Index Mapping]: https://docs.microsoft.com/en-us/typography/opentype/spec/cmap
-[DirectWrite gets Hangul normalization quite wrong]: https://devblogs.microsoft.com/oldnewthing/20201009-00/?p=104351
-[Developing Arabic fonts]: https://www.arabeyes.org/Developing_Arabic_fonts
-[Dingbats]: https://en.wikipedia.org/wiki/Dingbat
-[Miscellaneous Symbols]: https://en.wikipedia.org/wiki/Miscellaneous_Symbols
-[Code page 437]: https://en.wikipedia.org/wiki/Code_page_437
+[dwritecore proposal]: https://github.com/microsoft/ProjectReunion/issues/112
+[text rendering hates you]: https://gankra.github.io/blah/text-hates-you/
+[minikin]: https://android.googlesource.com/platform/frameworks/minikin/+/refs/heads/master/libs/minikin
+[directwrite]: https://docs.microsoft.com/en-us/windows/win32/directwrite/direct-write-portal
+[core text]: https://developer.apple.com/documentation/coretext
+[state of text rendering]: http://behdad.org/text/
+[unicode bidirectional algorithm basics]: https://www.w3.org/International/articles/inline-bidi-markup/uba-basics
+[uax #9]: http://www.unicode.org/reports/tr9/
+[siggraph 2018 - digital typography]: https://www.slideshare.net/NicolasRougier1/siggraph-2018-digital-typography
+[noto]: https://www.google.com/get/noto/
+[unicode normalization]: https://unicode.org/reports/tr15/
+[unicode equivalence]: https://en.wikipedia.org/wiki/Unicode_equivalence
+[character to glyph index mapping]: https://docs.microsoft.com/en-us/typography/opentype/spec/cmap
+[directwrite gets hangul normalization quite wrong]: https://devblogs.microsoft.com/oldnewthing/20201009-00/?p=104351
+[developing arabic fonts]: https://www.arabeyes.org/Developing_Arabic_fonts
+[dingbats]: https://en.wikipedia.org/wiki/Dingbat
+[miscellaneous symbols]: https://en.wikipedia.org/wiki/Miscellaneous_Symbols
+[code page 437]: https://en.wikipedia.org/wiki/Code_page_437
 [text or emoji presentation]: https://en.wikipedia.org/wiki/Emoji#Emoji_versus_text_presentation
 [variation selector]: https://en.wikipedia.org/wiki/Variation_Selectors_(Unicode_block)
-[Font fallback deep dive]: https://raphlinus.github.io/rust/skribo/text/2019/04/04/font-fallback.html
-[HarfBuzz]: https://harfbuzz.github.io/
+[font fallback deep dive]: https://raphlinus.github.io/rust/skribo/text/2019/04/04/font-fallback.html
+[harfbuzz]: https://harfbuzz.github.io/
 [clusters]: https://harfbuzz.github.io/clusters.html
-[Let’s Stop Ascribing Meaning to Code Points]: https://manishearth.github.io/blog/2017/01/14/stop-ascribing-meaning-to-unicode-code-points/
+[let’s stop ascribing meaning to code points]: https://manishearth.github.io/blog/2017/01/14/stop-ascribing-meaning-to-unicode-code-points/
 [caret table]: https://docs.microsoft.com/en-us/typography/opentype/spec/gdef#ligature-caret-list-table
-[Breaking Paragraphs into Lines]: http://www.eprg.org/G53DOC/pdfs/knuth-plass-breaking.pdf
-[UAX #14]: https://unicode.org/reports/tr14/
+[breaking paragraphs into lines]: http://www.eprg.org/G53DOC/pdfs/knuth-plass-breaking.pdf
+[uax #14]: https://unicode.org/reports/tr14/
 [hyphenation]: https://en.wikipedia.org/wiki/Hyphenation_algorithm
-[shaping is Turing Complete]: https://litherum.blogspot.com/2019/03/addition-font.html
+[shaping is turing complete]: https://litherum.blogspot.com/2019/03/addition-font.html
 [harfbuzz/harfbuzz#1463 (comment)]: https://github.com/harfbuzz/harfbuzz/issues/1463#issuecomment-505592189
 [yeslogic/allsorts#29]: https://github.com/yeslogic/allsorts/issues/29
-[Layout.java]: https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/text/Layout.java
-[StaticLayout.java]: https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/text/StaticLayout.java
-[Piet text layout API]: https://www.cmyr.net/blog/piet-text-work.html
-[Fonts and Layout for Global Scripts]: https://simoncozens.github.io/fonts-and-layout/
-[Modern text rendering with Linux: Overview]: https://mrandri19.github.io/2019/07/24/modern-text-rendering-linux-overview.html
+[layout.java]: https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/text/Layout.java
+[staticlayout.java]: https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/text/StaticLayout.java
+[piet text layout api]: https://www.cmyr.net/blog/piet-text-work.html
+[fonts and layout for global scripts]: https://simoncozens.github.io/fonts-and-layout/
+[modern text rendering with linux: overview]: https://mrandri19.github.io/2019/07/24/modern-text-rendering-linux-overview.html
 [skribo]: https://github.com/linebender/skribo
-[Pango]: https://developer.gnome.org/pango/unstable/
-[Firefox bug 479829]: https://bugzilla.mozilla.org/show_bug.cgi?id=479829
+[pango]: https://developer.gnome.org/pango/unstable/
+[firefox bug 479829]: https://bugzilla.mozilla.org/show_bug.cgi?id=479829
 [writing modes]: https://developer.mozilla.org/en-US/docs/Web/CSS/writing-mode
-[Requirements for Japanese Text Layout]: https://www.w3.org/TR/jlreq/
+[requirements for japanese text layout]: https://www.w3.org/TR/jlreq/

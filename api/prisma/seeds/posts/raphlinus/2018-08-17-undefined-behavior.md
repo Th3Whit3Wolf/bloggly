@@ -1,10 +1,11 @@
 ---
 layout: post
-title:  "With Undefined Behavior, Anything is Possible"
-date:   2018-08-17 11:51:03 -0700
+title: "With Undefined Behavior, Anything is Possible"
+date: 2018-08-17 11:51:03 -0700
 categories: [programming, rust]
 ---
-![anything is possible](/assets/Anything_is_Possible_scaled.jpg)
+
+![anything is possible](https://raphlinus.github.io/assets/Anything_is_Possible_scaled.jpg)
 
 Undefined behavior contributes to many serious problems, including security vulnerabilities. It’s also, I believe, poorly understood, and discussions of it tend to become contentious. How did we get here? What are the best ways to deal with it? Is it a good thing or a bad thing, and if the latter, is it even possible to get rid of it? To address these questions will require digging a bit into history.
 
@@ -40,7 +41,7 @@ C requires rigorous attention to correct use of pointers, to avoid [use-after-fr
 
 But given this hammer, the committee applied it far more broadly. For example, shift-past-bitwidth is also considered undefined behavior. Many have argued persuasively that it would have been better to treat this particular case as “implementation defined,” so a programmer would be able to count on, for example, always getting the same result for the same inputs on the same chip (though it might be different on a different chip, like endianness). However, that’s not what they decided. Instead, computing `x << 64` is allowed to crash, subtly corrupt memory, or connect to a server to transfer money out of your account. That last is not a joke (along the lines of [nasal demons](http://www.catb.org/jargon/html/N/nasal-demons.html)); undefined behavior is the source of many serious security vulnerabilities, and arithmetic issues (including shifting but especially integer overflow) a respectable subset of those.
 
-![anything is possible](/assets/unicorndraft1.jpg)
+![anything is possible](https://raphlinus.github.io/assets/unicorndraft1.jpg)
 
 Indeed, there is a very large catalog of potential undefined behaviors: signed integer overflow, reading uninitialized memory, computing (not just dereferencing!) an out-of-bounds pointer, type punning through pointers, etc. I won’t try to give an exhaustive catalog here (John Regehr’s [guide](https://blog.regehr.org/archives/213) is an excellent introduction), but the point is that it cast such a wide net that essentially all extant programs ran into one or another form of it.
 
@@ -89,15 +90,15 @@ One of the reasons why undefined behavior is so insidious is that it’s so diff
 A word of caution, however. As pointed out by [Undefined Behavior in 2017](https://blog.regehr.org/archives/1520), these sanitizers only go so far. Follow that link to read lots more detail about how to mitigate undefined behavior in real systems.
 
 Commenting on an earlier draft, Thomas Lord writes:
- 
+
 > I think probably many or most working programmers using C are probably doing it wrong. Not that there is only one true way — but.
-> 
+>
 > If one's interest is in safe, portable code – C can be a very fine choice. One must use it well, though. C should be regarded as a target language. I mean this more broadly than people usually do.
-> 
+>
 > C’s sharp edges can be managed safely two ways, at least:
-> 
+>
 > One is through careful use of well-designed coding standards. Large program authors should make key architectural decisions very early on, define a safe, constrained, style – and have the team stick to that style.
-> 
+>
 > In some situations, additionally: code generation tools are appropriate. Those can be hybrids that mix C fragments with other stuff (like lex and yacc) – or higher level languages entirely.
 
 ## A problem with C alone?
@@ -116,17 +117,17 @@ If you’ve read this far, now I can reveal that the real point of this post is 
 
 ## Further reading
 
-* [Pointers Are Complicated, or: What's in a Byte?](https://www.ralfj.de/blog/2018/07/24/pointers-and-bytes.html)
+-   [Pointers Are Complicated, or: What's in a Byte?](https://www.ralfj.de/blog/2018/07/24/pointers-and-bytes.html)
 
-* [A Guide to Undefined Behavior in C and C++, Part 1](https://blog.regehr.org/archives/213)
+-   [A Guide to Undefined Behavior in C and C++, Part 1](https://blog.regehr.org/archives/213)
 
-* [Proposal for a Friendly Dialect of C](https://blog.regehr.org/archives/1180)
+-   [Proposal for a Friendly Dialect of C](https://blog.regehr.org/archives/1180)
 
-* [The Problem with Friendly C](https://blog.regehr.org/archives/1287)
+-   [The Problem with Friendly C](https://blog.regehr.org/archives/1287)
 
-* [Reconciling High-level Optimizations and Low-level Code in LLVM](http://sf.snu.ac.kr/llvmtwin/)
+-   [Reconciling High-level Optimizations and Low-level Code in LLVM](http://sf.snu.ac.kr/llvmtwin/)
 
-* [C Is Not a Low-level Language](https://queue.acm.org/detail.cfm?id=3212479)
+-   [C Is Not a Low-level Language](https://queue.acm.org/detail.cfm?id=3212479)
 
 ## Discuss
 

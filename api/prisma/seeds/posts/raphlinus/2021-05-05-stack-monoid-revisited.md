@@ -1,9 +1,10 @@
 ---
 layout: post
-title:  "The stack monoid revisited"
-date:   2021-05-13 07:52:42 -0700
+title: "The stack monoid revisited"
+date: 2021-05-13 07:52:42 -0700
 categories: [gpu]
 ---
+
 This is a followup to my previous post on the [stack monoid], but is intended to be self-contained.
 
 ## Motivation: tree structured data
@@ -27,9 +28,9 @@ for element in scene:
 
 Basically, this represents the fact that each drawing element is clipped by all the clip paths in the path up to the root of the tree. Having precise bounding boxes is essential for the performance and correctness of later stages in the pipeline. There's a bit more discussion in [clipping in piet-gpu] (an issue in this blog that hopefully will become a post soon).
 
-The computation of bounding box intersections is not particularly tricky. If it were just a sequence of pushes and no pops, it could easily be modelled by a scan (generalized prefix sum) operation over the "rectangle intersection" monoid. The tricky part is the stack, which is basically unbounded in size. In my previous post, I had some ideas how to handle that, as the stack *is* a monoid, but the proposal wasn't all that practical. For one, it required additional scratch space that was difficult to bound in advance.
+The computation of bounding box intersections is not particularly tricky. If it were just a sequence of pushes and no pops, it could easily be modelled by a scan (generalized prefix sum) operation over the "rectangle intersection" monoid. The tricky part is the stack, which is basically unbounded in size. In my previous post, I had some ideas how to handle that, as the stack _is_ a monoid, but the proposal wasn't all that practical. For one, it required additional scratch space that was difficult to bound in advance.
 
-Since then, I've figured out a better algorithm. In fact, I think it's a *really good* algorithm, and might even be considered to push the boundary about what's possible to implement reasonably efficiently on GPU.
+Since then, I've figured out a better algorithm. In fact, I think it's a _really good_ algorithm, and might even be considered to push the boundary about what's possible to implement reasonably efficiently on GPU.
 
 For the remainder of this post, I'll drop the bounding boxes and just consider the stack structure; those can be added back in later without any serious difficulty. This is known in the literature as the "parentheses matching problem" and has other names. I prefer "stack monoid" because identifying it as a monoid is a clear guide that parallel (or incremental) algorithms are possible, but I'm not sure the term has caught on. Another reason I prefer the "monoid" terminology is that it emphasizes that the pure stack monoid can be composed with other monoids such as axis-aligned rectangle intersection; conceptually I think of the data type implemented by this algorithm as `Stack<T> where T: Monoid`.
 
@@ -44,7 +45,7 @@ for i in 0..len(input):
         ')' => stack.pop()
 ```
 
-Here, every open parenthesis is assigned the index of its parent in the tree, and every close parenthesis is assigned the index of its corresponding open parenthesis. Note that here I've also changed the order so that generating the result happens *before* processing the element. This is analogous to the distinction between inclusive and exclusive prefix sum; generally the same algorithm can be used for both, but sometimes one or the other is more convenient. When compputing bounding boxes, the inclusive version is better, because we want the bounding box of the element, as modified by the clips. But for purely tracking tree structure, the exclusive version is easier.
+Here, every open parenthesis is assigned the index of its parent in the tree, and every close parenthesis is assigned the index of its corresponding open parenthesis. Note that here I've also changed the order so that generating the result happens _before_ processing the element. This is analogous to the distinction between inclusive and exclusive prefix sum; generally the same algorithm can be used for both, but sometimes one or the other is more convenient. When compputing bounding boxes, the inclusive version is better, because we want the bounding box of the element, as modified by the clips. But for purely tracking tree structure, the exclusive version is easier.
 
 An example:
 
@@ -56,7 +57,7 @@ value -  0  1  2  1  4  5  6  5  4  9 10  9 12  9  4  1  0
 
 It might be easier to visualize in tree form:
 
-![Diagram showing parent relationships in a tree](/assets/stack_monoid_parent_tree.svg)
+![Diagram showing parent relationships in a tree](https://raphlinus.github.io/assets/stack_monoid_parent_tree.svg)
 
 An interesting fact is that from this it's quite straightforward to reconstruct the snapshot of the stack at each element, just by walking up the chain of parent links to the root. And, importantly, this "all snapshots" representation takes no more space than the stack itself (assuming the input has no additional bounds on nesting depth). This sequence-of-snapshots can be considered an immutable data structure which is gradually resolved and revealed by the algorithm, as opposed to the stack itself, which is both mutable and requires O(n) space for each instance, a serious problem for efficient GPU implementation.
 
@@ -80,17 +81,17 @@ The ability to compute the stack monoid on slices of the input, then stitch them
 
 My previous blog post suggested a window of size k with a spill feature. No doubt this can be done, but dealing with the spills would be quite tedious to implement and also use extra scratch memory that's hard to bound.
 
-The solution is to do the reduction in-place. Before, there are two monoid elements derived from input slices of size k each, and after, there is one covering an input slice of size 2 * k. The key insight is that shuffling the monoid can be done in-place, requiring 1 step of 2 * k parallel threads.
+The solution is to do the reduction in-place. Before, there are two monoid elements derived from input slices of size k each, and after, there is one covering an input slice of size 2 _ k. The key insight is that shuffling the monoid can be done in-place, requiring 1 step of 2 _ k parallel threads.
 
 The details of the accounting are slightly tedious, but conceptually it's simple enough. It helps when the sequence is right-aligned; note that all elements in b's push sequence are preserved, so nothing needs to happen. If there is one thread per element, as is typical in a GPU compute shader workgroup, each thread just decides its value, based on the push and pop counts of the two inputs: either empty (in which case it doesn't need to be written), or a value from one of the two input sequences. It's probably easiest to show that as a picture:
 
-![Diagram showing combination of two stack monoid elements](/assets/stack_monoid_combine.svg)
+![Diagram showing combination of two stack monoid elements](https://raphlinus.github.io/assets/stack_monoid_combine.svg)
 
 Then, for a workgroup of, say, size 16, it's possible to compute the stack monoid for that workgroup in a tree of 4 stages:
 
-![Diagram showing reduction of a sequence of 16 parentheses in 4 stages](/assets/stack_monoid_reduction.svg)
+![Diagram showing reduction of a sequence of 16 parentheses in 4 stages](https://raphlinus.github.io/assets/stack_monoid_reduction.svg)
 
-Note that these stack slices are *not* the final output. Rather, they are intermediate values used to compute the final output. In general, when doing a combination of two stack slices (monoid elements), some of the outputs in the second slice can be resolved. For example, when combining a single push and a single pop, the output corresponding to the pop element is the index of the push, but the resulting stack slice is empty. When parentheses are matched in this manner, they are recorded to the output then erased from the resulting stack slice. In other cases, the outputs are still pending, and wait for a later combination. This generation of the output is not shown in the figures above, but features prominently in the [code][working code].
+Note that these stack slices are _not_ the final output. Rather, they are intermediate values used to compute the final output. In general, when doing a combination of two stack slices (monoid elements), some of the outputs in the second slice can be resolved. For example, when combining a single push and a single pop, the output corresponding to the pop element is the index of the push, but the resulting stack slice is empty. When parentheses are matched in this manner, they are recorded to the output then erased from the resulting stack slice. In other cases, the outputs are still pending, and wait for a later combination. This generation of the output is not shown in the figures above, but features prominently in the [code][working code].
 
 ## Look-back
 
@@ -98,9 +99,9 @@ The central innovation of this algorithm is using decoupled look-back to stitch 
 
 This idea of a snapshot of size 1024, every 1024 elements (to pick a typical partition size) is key. The total storage required is also one cell per input element, same as the purely sequential case. And by having a slice rather than a single link, a workgroup can process all elements in the slice in parallel.
 
-The algorithm is layered on top of decoupled look-back. It's worth reading the [paper][Single-pass Parallel Prefix Scan with Decoupled Look-back] to get a detailed understanding of the algorithm, and especially why it works well on modern GPUs (it's not obvious), but I'll go over the basic idea here. In the simplest form, each partition is in three states: initial, it has published its local aggregate (using only information from the partition), or it has published the entire prefix from the beginning. A partition walks back sequentially and proceeds depending on the state. If it's still initial, it can make no progress and spins. If it's a local aggregate, it does the monoid operation to add it, then continues scanning. And if it hits a published version, it incorporates that, publishes the result, and is done.
+The algorithm is layered on top of decoupled look-back. It's worth reading the [paper][single-pass parallel prefix scan with decoupled look-back] to get a detailed understanding of the algorithm, and especially why it works well on modern GPUs (it's not obvious), but I'll go over the basic idea here. In the simplest form, each partition is in three states: initial, it has published its local aggregate (using only information from the partition), or it has published the entire prefix from the beginning. A partition walks back sequentially and proceeds depending on the state. If it's still initial, it can make no progress and spins. If it's a local aggregate, it does the monoid operation to add it, then continues scanning. And if it hits a published version, it incorporates that, publishes the result, and is done.
 
-This *almost* solves the problem, but there is one remaining detail. It's possible that, even when you reach a published prefix, the stack slice that results from combining with it is smaller than the partition size. This will happen when the stack itself is larger than the partition (so would not happen if the maximum stack depth were bounded by the partition size) and the second monoid element has more pops than pushes. The solution is to follow the link from the *bottom* of the stack slice published by the leftmost scanned partition. This is a generalization of following the chain of parents as described earlier, but because the stack slice is (typically) 1024 elements deep, following the bottom-most link allows jumping over huge chunks of the input. In testing with random parentheses sequences, the algorithm seldom if ever needed to follow more than one such backlink, and following the backlinks at all (which could be suppressed by bounding input stack depth) only added a few percent to total running time. A slight caution: an adversarial input could probably force resolution of a potentially large number of backlinks.
+This _almost_ solves the problem, but there is one remaining detail. It's possible that, even when you reach a published prefix, the stack slice that results from combining with it is smaller than the partition size. This will happen when the stack itself is larger than the partition (so would not happen if the maximum stack depth were bounded by the partition size) and the second monoid element has more pops than pushes. The solution is to follow the link from the _bottom_ of the stack slice published by the leftmost scanned partition. This is a generalization of following the chain of parents as described earlier, but because the stack slice is (typically) 1024 elements deep, following the bottom-most link allows jumping over huge chunks of the input. In testing with random parentheses sequences, the algorithm seldom if ever needed to follow more than one such backlink, and following the backlinks at all (which could be suppressed by bounding input stack depth) only added a few percent to total running time. A slight caution: an adversarial input could probably force resolution of a potentially large number of backlinks.
 
 ## Some theory
 
@@ -118,7 +119,7 @@ Other older literature that's relevant is section 1.23 (ordered trees) in Iverso
 
 Part of the development of this algorithm was revisiting memory coherence, as I had some nasty bugs on that front. I was able to resolve them in a satisfactory way.
 
-When I explored implementing [prefix sum], my attempt at a compatible solution was to put the `volatile` qualifier on the buffer used to publish the aggregates. And that worked in my testing in Nvidia GTX 10x0 GPU's. I was hopeful that, while not properly specified anywhere, accesses to a volatile buffer would implicitly have acquire and release semantics, as was the case in [MSVC][MSVC volatile]. However, this was unsatisfying, as "it works on one GPU" is a weak guarantee indeed.
+When I explored implementing [prefix sum], my attempt at a compatible solution was to put the `volatile` qualifier on the buffer used to publish the aggregates. And that worked in my testing in Nvidia GTX 10x0 GPU's. I was hopeful that, while not properly specified anywhere, accesses to a volatile buffer would implicitly have acquire and release semantics, as was the case in [MSVC][msvc volatile]. However, this was unsatisfying, as "it works on one GPU" is a weak guarantee indeed.
 
 My feeling at the time was that the [Vulkan memory model] was the best way forward, in that it gave a precise contract between the code and the GPU; the code can ask for exactly the level of memory coherence required, and the GPU can optimize as aggressively as it likes, as long as it respects the constraints. The current version of the prefix sum implementation requires the Vulkan memory model extension.
 
@@ -134,11 +135,11 @@ Another thing to note is that the current prototype, while otherwise portable, c
 
 One of the most important things about having [working code] is that it's possible to measure its performance. Testing that it's correct is also important, of course!
 
-I measured this implementation on an AMD 5700 XT, which is a reasonably high end graphics card, though not top of the line. The bottom line performance number is 2.4 billion elements per second (the test was processing a sequence of 1M pseudorandom parens). This is about 10x faster than the Rust scalar code to verify the result. I would characterize this as pretty good but not necessarily jaw-dropping. You probably wouldn't want to upload a dataset to the GPU just to match parenthesis, but if you can integrate this into a pipeline with other stages and *keep* the data on GPU rather than doing readback to the CPU, it's potentially a big win.
+I measured this implementation on an AMD 5700 XT, which is a reasonably high end graphics card, though not top of the line. The bottom line performance number is 2.4 billion elements per second (the test was processing a sequence of 1M pseudorandom parens). This is about 10x faster than the Rust scalar code to verify the result. I would characterize this as pretty good but not necessarily jaw-dropping. You probably wouldn't want to upload a dataset to the GPU just to match parenthesis, but if you can integrate this into a pipeline with other stages and _keep_ the data on GPU rather than doing readback to the CPU, it's potentially a big win.
 
 It's instructive to break down the performance and see how it varies with workgroup size. In the following chart, I measured the time for just the local reduction, and also the full algorithm including look-back.
 
-![Performance chart for implementation](/assets/stack_monoid_performance.png)
+![Performance chart for implementation](https://raphlinus.github.io/assets/stack_monoid_performance.png)
 
 The time for the local reduction is proportional to lg(workgroup size), and measurement of that is as expected. The cost of the look-back decreases as the workgroup size increases, which is not surprising - the total number of publish operations needed is inversely proportional to the workgroup size. Since (in this implementation) look-back is more expensive, the best performance is at a workgroup size of 1024. A larger workgroup might be slightly better, but looking at this graph, not dramatically so.
 
@@ -168,20 +169,20 @@ There's a bit of discussion on [lobste.rs](https://lobste.rs/s/xivkj6/stack_mono
 
 [stack monoid]: https://raphlinus.github.io/gpu/2020/09/05/stack-monoid.html
 [gpu-check]: https://github.com/linebender/piet-gpu/pull/92
-[Efficient EREW PRAM algorithms for parentheses-matching]: https://ieeexplore.ieee.org/document/308536
-[clipPath]: https://developer.mozilla.org/en-US/docs/Web/SVG/Element/clipPath
+[efficient erew pram algorithms for parentheses-matching]: https://ieeexplore.ieee.org/document/308536
+[clippath]: https://developer.mozilla.org/en-US/docs/Web/SVG/Element/clipPath
 [clip]: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/clip
-[Parallel RAM]: https://en.wikipedia.org/wiki/Parallel_RAM
+[parallel ram]: https://en.wikipedia.org/wiki/Parallel_RAM
 [prefix sum]: https://raphlinus.github.io/gpu/2020/04/30/prefix-sum.html
-[MSVC volatile]: https://docs.microsoft.com/en-us/cpp/cpp/volatile-cpp?view=msvc-160#end-of-iso-compliant
+[msvc volatile]: https://docs.microsoft.com/en-us/cpp/cpp/volatile-cpp?view=msvc-160#end-of-iso-compliant
 [gpuweb#1621]: https://github.com/gpuweb/gpuweb/issues/1621
 [rust-gpu]: https://github.com/EmbarkStudios/rust-gpu
 [clipping in piet-gpu]: https://github.com/raphlinus/raphlinus.github.io/issues/52
-[Single-pass Parallel Prefix Scan with Decoupled Look-back]: https://research.nvidia.com/publication/single-pass-parallel-prefix-scan-decoupled-look-back
+[single-pass parallel prefix scan with decoupled look-back]: https://research.nvidia.com/publication/single-pass-parallel-prefix-scan-decoupled-look-back
 [seriot json]: http://seriot.ch/parsing_json.php
 [piet-gpu]: https://github.com/linebender/piet-gpu
-[Vulkan memory model]: https://www.khronos.org/blog/comparing-the-vulkan-spir-v-memory-model-to-cs
+[vulkan memory model]: https://www.khronos.org/blog/comparing-the-vulkan-spir-v-memory-model-to-cs
 [working code]: https://github.com/linebender/piet-gpu/pull/90
 [forward progress]: https://github.com/linebender/piet-gpu/blob/f6c2558743937f1e5d0eeb9ae1998a3746133349/piet-gpu/shader/elements.comp#L251
-[APL book]: http://www.softwarepreservation.org/projects/apl/Books/APROGRAMMING%20LANGUAGE
+[apl book]: http://www.softwarepreservation.org/projects/apl/Books/APROGRAMMING%20LANGUAGE
 [thesis on co-dfns]: https://scholarworks.iu.edu/dspace/handle/2022/24749

@@ -78,52 +78,83 @@ const main = async () => {
 					return console.log(`Unable to scan directory: ${err}`);
 				}
 				for (const file of files) {
-					const createdAt = new Date(`${file.slice(0, 10)}`);
-					const title = file
+					let createdAt;
+					createdAt = new Date(`${file.slice(0, 10)}`);
+					let title;
+					title = file
 						.slice(11, file.length - 3)
 						.split("-")
 						.map(word => word[0].toUpperCase() + word.substring(1))
 						.join(" ");
 					const filePath = path.join(postsPath, file);
-					await fs.readFile(
-						filePath,
-						"utf8",
-						async (error, content) => {
-							if (error) {
-								return console.log(
-									`Unable to read ${filePath}: ${error}`
-								);
-							}
-							try {
-								const findPost = await db.Post.findFirst({
-									where: {
-										userID,
-										title
+					await fs.readFile(filePath, "utf8", async (error, data) => {
+						if (error) {
+							return console.log(
+								`Unable to read ${filePath}: ${error}`
+							);
+						}
+						const frontmatter = {};
+						const lines = data.split("\n");
+						if (lines[0].startsWith("---")) {
+							lines.shift();
+							for (let inc = 0; inc < 100; ) {
+								if (lines[inc].startsWith("---")) {
+									lines.shift();
+									inc = 100;
+								} else {
+									const frontmatterSplit =
+										lines[inc].split(":");
+									if (frontmatterSplit.length === 2) {
+										frontmatter[
+											frontmatterSplit[0].trim()
+										] = frontmatterSplit[1]
+											.trim()
+											.replaceAll('"', "");
 									}
-								});
-								if (findPost === null) {
-									try {
-										await db.Post.create({
-											data: {
-												userID,
-												title,
-												content,
-												createdAt
-											}
-										});
-									} catch (dbError) {
-										throw new Error(
-											`Error occured while adding Post(${username} - ${title}) to the database: ${dbError}`
-										);
-									}
+									lines.shift();
 								}
-							} catch (dbErr) {
-								throw new Error(
-									`Error occured while seeding Post(${username} - ${title}): ${dbErr}`
-								);
 							}
 						}
-					);
+
+						const content = lines
+							.join("\n")
+							.replace(/(<([^>]+)>)/gi, "");
+						if (frontmatter.title !== undefined) {
+							title = frontmatter.title;
+						}
+						if (frontmatter.date !== undefined) {
+							createdAt = new Date(frontmatter.date);
+						}
+
+						try {
+							const findPost = await db.Post.findFirst({
+								where: {
+									userID,
+									title
+								}
+							});
+							if (findPost === null) {
+								try {
+									await db.Post.create({
+										data: {
+											userID,
+											title,
+											content,
+											createdAt
+										}
+									});
+								} catch (dbError) {
+									throw new Error(
+										`Error occured while adding Post(${username} - ${title}) to the database: ${dbError}`
+									);
+								}
+							}
+						} catch (dbErr) {
+							throw new Error(
+								`Error occured while seeding Post(${username} - ${title}): ${dbErr}`
+							);
+						}
+					});
 				}
 			});
 		} catch (err) {

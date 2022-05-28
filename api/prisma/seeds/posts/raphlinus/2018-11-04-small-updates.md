@@ -1,9 +1,10 @@
 ---
 layout: post
-title:  "Small updates"
-date:   2018-11-04 07:42:42 -0700
+title: "Small updates"
+date: 2018-11-04 07:42:42 -0700
 categories: [personal]
 ---
+
 There's been a lot going on, and I've wanted to focus on coding recently, so the technically deep posts that I've been meaning to write remain in the pipeline. In the meantime, here are some updates on various things.
 
 ## Zulip
@@ -28,7 +29,7 @@ I haven't had _quite_ as much time to focus on the synthesizer as I would have l
 
 This is a very rough draft of what the the patcher interface looks like:
 
-![Screenshot of patcher](/assets/patcher.png)
+![Screenshot of patcher](https://raphlinus.github.io/assets/patcher.png)
 
 There's a bunch I want to change (the little control squares need to become knobs, icons on the chips), but this feels like it's maybe halfway toward the vision I have for it.
 
@@ -54,10 +55,10 @@ I expect to use the Patreon more as signal, what kinds of things I work on that 
 
 I'm volunteering as a pollworker on Election Day. If you are eligible to vote, please do.
 
-[The hard parts of open source]: https://www.thestrangeloop.com/2018/the-hard-parts-of-open-source.html
-[Recurse Center]: https://recurse.com
+[the hard parts of open source]: https://www.thestrangeloop.com/2018/the-hard-parts-of-open-source.html
+[recurse center]: https://recurse.com
 [xi.zulipchat.com]: https://xi.zulipchat.com
 [druid]: https://github.com/xi-editor/druid
 [xi-win]: https://github.com/xi-editor/xi-win
-[Hilmar Gústafsson]: https://github.com/LiHRaM
-[SF Rust Meetup]: https://www.meetup.com/Rust-Bay-Area/events/255058428/
+[hilmar gústafsson]: https://github.com/LiHRaM
+[sf rust meetup]: https://www.meetup.com/Rust-Bay-Area/events/255058428/

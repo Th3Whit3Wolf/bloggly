@@ -1,9 +1,10 @@
 ---
 layout: post
-title:  "Blurred rounded rectangles"
-date:   2020-04-21 11:24:42 -0800
+title: "Blurred rounded rectangles"
+date: 2020-04-21 11:24:42 -0800
 categories: [graphics]
 ---
+
 <script type="text/x-mathjax-config">
     MathJax.Hub.Config({
         tex2jax: {
@@ -17,7 +18,7 @@ Note: I'm publishing this with inadequate visuals, as it's been stuck in my queu
 
 For now, a quick comparison of exact (computed with numerical integration) results (on the left) with my approximation:
 
-![Comparison of exact and approximate solutions](/assets/blurrr_comparison.png)
+![Comparison of exact and approximate solutions](https://raphlinus.github.io/assets/blurrr_comparison.png)
 
 There are two basic ways to render blur in 2D graphics. The general technique is to render the objects into an offscreen buffer, compute a blur, and composite that into the target surface. But in special cases, it's possible to compute the blurred image directly from the source object, which is much faster.
 
@@ -39,17 +40,17 @@ It happens that this solution generalizes to a rectangle. Since a rectangle is t
 
 Instead, we'll use distance functions, as they do have the power and flexibility we need.
 
-The general approach is to compute a signed distance from an outline, then use that distance as input to a function which computes the actual grayscale value. This approach separates the problem into the *shape* of the contour lines and the *values,* which (for reasons we'll see) are best understood as a cross-section through the minor axis of the rectangle.
+The general approach is to compute a signed distance from an outline, then use that distance as input to a function which computes the actual grayscale value. This approach separates the problem into the _shape_ of the contour lines and the _values,_ which (for reasons we'll see) are best understood as a cross-section through the minor axis of the rectangle.
 
 As Jonathan Blow has [recently tweeted](https://twitter.com/Jonathan_Blow/status/1244792815512510469), "The most useful thing I ever learned, about how to do geometric operations in software, is to separate the problem into parallel and orthogonal components. It applies to just about everything." While this is most obvious for classical geometric problems such as projecting a point onto a line, distance field techniques can be seen as another tool in the toolbox following this general principle. A distance field represents the value of the orthogonal component, with the parallel component filtered out.
 
 To visualize contours (the parallel component) better, we'll quantize the grayscale values. And we can see that for relatively small blur radii these contours look a lot like plain rounded rectangles. This motivates the first solution:
 
-* The curve is a rounded rectangle.
+-   The curve is a rounded rectangle.
 
-* The corner radius is computed as a combination of the original corner radius and blur radius.
+-   The corner radius is computed as a combination of the original corner radius and blur radius.
 
-* The cross-section of the minor axis is the 1D solution.
+-   The cross-section of the minor axis is the 1D solution.
 
 The combination cited in the second step is $ \sqrt{r_c^2 + 1.25 r_b^2} $. The choice of this formula is motivated by the rule for the probability distribution of a [sum of Gaussians], with the constant factor chosen empirically.
 
@@ -64,7 +65,7 @@ float sdRoundedBox( in vec2 p, in vec2 b, in float r ) {
 }
 ```
 
-![Distance field of rounded rectangle](/assets/rounded_rect_distfield.png)
+![Distance field of rounded rectangle](https://raphlinus.github.io/assets/rounded_rect_distfield.png)
 (Image adapted from [https://www.shadertoy.com/view/4llXD7](https://www.shadertoy.com/view/4llXD7))
 
 Note the use of `min` and `max` rather than conditional branching. The former is much faster in both shaders and SIMD evaluation.
@@ -78,12 +79,11 @@ pub fn compute_erf7(x: f64) -> f64 {
     let x = x + (0.24295 + (0.03395 + 0.0104 * xx) * xx) * (x * xx);
     x / (1.0 + x * x).sqrt()
 }
-``` 
+```
 
-Evan's version is based on an approximation from Abramowitz and Stegun, which has [similar accuracy][Desmos calculator for erf approximations] and likely similar performance, but I like using reciprocal square root - it is particularly well supported in [SIMD](https://www.felixcloutier.com/x86/rsqrtps) and [GPU](https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/inversesqrt.xhtml) and is generally about the same speed as simple division.
+Evan's version is based on an approximation from Abramowitz and Stegun, which has [similar accuracy][desmos calculator for erf approximations] and likely similar performance, but I like using reciprocal square root - it is particularly well supported in [SIMD](https://www.felixcloutier.com/x86/rsqrtps) and [GPU](https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/inversesqrt.xhtml) and is generally about the same speed as simple division.
 
-[![Comparison of exact and approximate solutions](/assets/erf_approx.png)][Desmos calculator for erf approximations]
-
+[![Comparison of exact and approximate solutions](https://raphlinus.github.io/assets/erf_approx.png)][desmos calculator for erf approximations]
 
 ### Evaluation
 
@@ -95,15 +95,15 @@ The contour of the blurred rounded rectangle strongly resembles a [squircle] or 
 
 Here what we want to do is adapt the distance field approach to use a distance-like metric rather than an exact distance to the reference curve. Basically, the game plan is as follows:
 
-* Structure of distance field is same as rounded rect.
+-   Structure of distance field is same as rounded rect.
 
-* Increase exponent from 2 (circle) to make superellipse shape.
+-   Increase exponent from 2 (circle) to make superellipse shape.
 
-* Cross-section is as above.
+-   Cross-section is as above.
 
 Increasing the exponent clearly solves the main issues with the pure rounded rectangle shape, namely the sharp interior corners (which generate a visible "x" structure) and the abrupt straight to curved transitions:
 
-![Distance field of rounded rectangle with exponent 4](/assets/rounded_rect_distfield_exp.png)
+![Distance field of rounded rectangle with exponent 4](https://raphlinus.github.io/assets/rounded_rect_distfield_exp.png)
 
 A more complete writeup of the final code is a TODO for this blog (along with better visuals), but see [the code](https://git.sr.ht/~raph/blurrr/tree/master/src/distfield.rs) for the detailed solution.
 
@@ -121,7 +121,7 @@ One obvious generalization is to more shapes. The easiest by far is to squircle-
 
 Good approximations to many other blurred shapes are possible, as a rich set of [2D distance functions] are known and in widespread use in shader circles.
 
-Also, perhaps your designer prefers [bokehlicious][Bokeh] discs to Gaussian shadows. Doable. Just use a different [cross-section function][bokeh cross-section] and tweak the parameters.
+Also, perhaps your designer prefers [bokehlicious][bokeh] discs to Gaussian shadows. Doable. Just use a different [cross-section function][bokeh cross-section] and tweak the parameters.
 
 Some fine-tuning on the code can still be done. For example, the "magic constants" were mostly determined through experimentation. A more systematic approach would be to do a global optimization, minimizing the value of some error norm over a range of parameters. Maybe an enterprising reader will take this on!
 
@@ -129,19 +129,19 @@ Some fine-tuning on the code can still be done. For example, the "magic constant
 
 Thanks to Evan Wallace for permission to use his WebGL code (hoped for in a future revision), to Jacob Rus for discussion about the math, and Paul Miller for the wasm port.
 
-[sum of Gaussians]: https://en.wikipedia.org/wiki/Sum_of_normally_distributed_random_variables
+[sum of gaussians]: https://en.wikipedia.org/wiki/Sum_of_normally_distributed_random_variables
 [fast rounded rectangle shadows]: http://madebyevan.com/shaders/fast-rounded-rectangle-shadows/
 [druid]: https://github.com/xi-editor/druid
 [blurrr]: https://git.sr.ht/~raph/blurrr
-[Web version]: https://blurrr.futurepaul.now.sh/
-[2D distance functions]: https://www.iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
+[web version]: https://blurrr.futurepaul.now.sh/
+[2d distance functions]: https://www.iquilezles.org/www/articles/distfunctions2d/distfunctions2d.htm
 [favorite sigmoids]: https://raphlinus.github.io/audio/2018/09/05/sigmoid.html
 [erf]: https://en.wikipedia.org/wiki/Error_function
-[Desmos calculator for erf approximations]: https://www.desmos.com/calculator/tcuwxfqyrl
+[desmos calculator for erf approximations]: https://www.desmos.com/calculator/tcuwxfqyrl
 [squircle]: https://en.wikipedia.org/wiki/Squircle
 [superellipse]: https://en.wikipedia.org/wiki/Superellipse
-[Apple thinks so]: https://www.figma.com/blog/desperately-seeking-squircles/
+[apple thinks so]: https://www.figma.com/blog/desperately-seeking-squircles/
 [bokeh cross-section]: https://www.wolframalpha.com/input/?i=integral%20sqrt%281-x%5E2%29
-[Bokeh]: https://en.wikipedia.org/wiki/Bokeh
-[Inigo Quilez]: https://www.iquilezles.org/
+[bokeh]: https://en.wikipedia.org/wiki/Bokeh
+[inigo quilez]: https://www.iquilezles.org/
 [distance field]: https://www.iquilezles.org/www/articles/distfunctions/distfunctions.htm

@@ -1,9 +1,10 @@
 ---
 layout: post
-title:  "A sketch of string unescaping on GPGPU"
-date:   2018-04-25 13:10:03 -0700
+title: "A sketch of string unescaping on GPGPU"
+date: 2018-04-25 13:10:03 -0700
 categories: personal
 ---
+
 In a modern computer, the GPU has vastly more raw computing capability than the CPU. Some tasks (like text painting, which I redid recently in xi-mac in OpenGL) lend themselves well to efficient computation in the GPU, because they're naturally parallel. Other tasks seem innately serial. It's the ones in the middle where I think things will get interesting.
 
 The task I've been pondering lately is JSON parsing. While it's most natural to think of it in sequential terms, I believe it is possible to formulate it in terms of parallel computation. This post will focus on a specific fragment, string unescaping. It is an important to the overall problem, but more to the point it captures the seemingly sequential nature of parsing. In particular, an extra quote or backslash near the beginning of the input can affect a parse decision taken much later. Even so, I will demonstrate that the problem can be solved in parallel, with significant speedup over the scalar CPU case, though I don't believe it's quite practical yet.
@@ -14,7 +15,7 @@ There's some precedent for my exploration, including [nvParse](https://github.co
 
 As with most simple parsing techniques, I'll start with a state machine, shown in the following diagram:
 
-![state machine](/assets/unescaping_screenshot_sm.png)
+![state machine](https://raphlinus.github.io/assets/unescaping_screenshot_sm.png)
 
 The initial state is 0. A quote mark moves to state 1, which means "in a string." In a string, a backslash moves to state 2, which means "after backslash." Any character in state 2 moves back to state 1, and a quote in state 1 is interpreted as a closing quote, which moves back to state 0, ready for the next string. In addition, a backslash appearing outside a string (ie in state 0) is an error, and I reserve state 3 for that.
 

@@ -1,9 +1,10 @@
 ---
 layout: post
-title:  "piet-gpu progress report"
-date:   2020-06-01 10:52:42 -0700
+title: "piet-gpu progress report"
+date: 2020-06-01 10:52:42 -0700
 categories: [rust, graphics, gpu]
 ---
+
 This post is an update to [2D Graphics on Modern GPU], just over a year ago. How time flies!
 
 That post set out a vision of rendering 2D graphics on a GPU, using compute kernels rather than the rasterization pipeline, and offloading as much work as possible from the CPU to the GPU. It was also a rough research prototype, and I've spent some time trying to improve it in various ways. This blog post represents a checkpoint of that work - it's still a research prototype, but improved.
@@ -32,7 +33,7 @@ At one extreme, we have fully static content, which might be rendered with diffe
 
 At the other extreme, the 2D scene is generated from scratch every frame, and might share nothing with the previous frame. Precomputation just adds to the frame time, so the emphasis must be on getting the scene into the pipeline as quickly as possible. A good example of this type of content is scientific visualization.
 
-In the middle is rendering for UI. Most frames resemble the previous frame, maybe with some transformations of some of the scene (for example, scrolling a window), maybe with some animation of parameters such as alpha opacity. Of course, some of the time the changes might be more dynamic, and it's important not to add to the latency of creating a new view and instantiating all its resources. A major approach to improving the performance in this use case is *layers.*
+In the middle is rendering for UI. Most frames resemble the previous frame, maybe with some transformations of some of the scene (for example, scrolling a window), maybe with some animation of parameters such as alpha opacity. Of course, some of the time the changes might be more dynamic, and it's important not to add to the latency of creating a new view and instantiating all its resources. A major approach to improving the performance in this use case is _layers._
 
 Text rendering also has this mixed nature; the text itself is dynamic, but often it's possible to precompute the font. Signed distance fields are a very popular approach for text rendering in games, but the approach has significant drawbacks, including RAM usage and challenges representing fine detail (as is needed for very thin font weights, for example).
 
@@ -50,7 +51,7 @@ A particular interest of mine is variable fonts, and especially the ability to v
 
 ### Flattening
 
-In the current piet-gpu pipeline, paths, made from lines, quadratic Bézier segments, and cubic Bézier segments, are *flattened* to polylines before being encoded and uploaded to the GPU. The flattening depends on the zoom factor; too coarse generates visible artifacts, and too fine is wasteful further down the pipeline (though it would certainly be possible to apply an adaptive strategy where a flattening result would be retained for a range of zoom factors).
+In the current piet-gpu pipeline, paths, made from lines, quadratic Bézier segments, and cubic Bézier segments, are _flattened_ to polylines before being encoded and uploaded to the GPU. The flattening depends on the zoom factor; too coarse generates visible artifacts, and too fine is wasteful further down the pipeline (though it would certainly be possible to apply an adaptive strategy where a flattening result would be retained for a range of zoom factors).
 
 The flattening algorithm is very sophisticated, and I hope to do either a blog post or a journal paper on the full version. I blogged previously about [flattening quadratic Béziers], but the new version has a couple of refinements: it works on cubics as well, and it also has improved handling of cusps. You can play with an [interactive JavaScript version](https://levien.com/tmp/flatten.html) or look at the [Rust implementation](https://github.com/linebender/kurbo/pull/105).
 
@@ -76,13 +77,13 @@ The third compute kernel is responsible for generating a per-tile command list (
 
 The fourth compute kernel reads its per-tile command list and generates all the pixels in a 16x16 tile, writing them to the output image. This stage is effectively identical to the pixel shader in the RAVG paper, but with one small twist. Because it's a compute kernel, each thread can read the input commands and generate a chunk of pixels (currently 8), amortizing the nontrivial cost of reading the tape over more more than just one pixel. Of course it would be possible to run this in a fragment shader if compute were not available.
 
-These kernels are relatively straightforward, but essentially brute-force. A common theme is that all threads in a workgroup cooperate to read the input in parallel, then there is a "block shuffle" approach to distribute that work to the individual threads responsible for writing out work for smaller subregions. I described an approach based on 32x32 boolean matrix transpose in my [Taste of GPU Compute][A taste of GPU compute] talk, but in practice we find that using atomic operations to assign work is slightly faster.
+These kernels are relatively straightforward, but essentially brute-force. A common theme is that all threads in a workgroup cooperate to read the input in parallel, then there is a "block shuffle" approach to distribute that work to the individual threads responsible for writing out work for smaller subregions. I described an approach based on 32x32 boolean matrix transpose in my [Taste of GPU Compute][a taste of gpu compute] talk, but in practice we find that using atomic operations to assign work is slightly faster.
 
 ### Layers
 
 As mentioned above, in a UI most of the time, most of the content in the frame is the same as the last frame. Some UI frameworks (imgui in particular) just traverse the entire UI state and draw every time, but most do something to cut down on work done.
 
-The main mechanism is some kind of *layer,* an object that retains the appearance of a widget or subview. In Apple toolkits, this layer ([CALayer] in particular) is a GPU-resident texture (image). This design made sense in the days of the iPhone 1, where the GPU was just barely powerful enough to composite the final surface from multiple such images at 60fps, but there are significant drawbacks to this approach. Applications need to avoid creating too many layers, as that can consume a huge amount of GPU memory. There's also increased latency when content changes dynamically, as it needs to be re-rendered and re-uploaded before being composited. But the approach does work. It also leads to a certain aesthetic, emphasizing the animations that can be efficiently expressed (translation and alpha fading) over others that would require re-rendering.
+The main mechanism is some kind of _layer,_ an object that retains the appearance of a widget or subview. In Apple toolkits, this layer ([CALayer] in particular) is a GPU-resident texture (image). This design made sense in the days of the iPhone 1, where the GPU was just barely powerful enough to composite the final surface from multiple such images at 60fps, but there are significant drawbacks to this approach. Applications need to avoid creating too many layers, as that can consume a huge amount of GPU memory. There's also increased latency when content changes dynamically, as it needs to be re-rendered and re-uploaded before being composited. But the approach does work. It also leads to a certain aesthetic, emphasizing the animations that can be efficiently expressed (translation and alpha fading) over others that would require re-rendering.
 
 Flutter has a more sophisticated approach, explained well in the video [Flutter's Rendering Pipeline]. There, a layer can be backed by either a recorded display list ([SkPicture](https://skia-doc.commondatastorage.googleapis.com/doxygen/doxygen/html/classSkPicture.html) under the hood) or a texture, with a heuristic to decide which one. My understanding is that SkPicture is implemented by recording drawing commands into a CPU-side buffer, then playing them back much as if they had been issued in immediate mode. Thus, it's primarily a technique to reduce time spent in the scripting layer, rather than a speedup in the rendering pipeline per se. The Android [RenderNode] is similar (and is used extensively in [Jetpack Compose]).
 
@@ -112,11 +113,11 @@ For performance testing, I'm using 3 samples from the [Massively-Parallel Vector
 
 With that said, here's a chart of the performance, broken down by pipeline stage. Here, k4 is "kernel 4", or fine rasterization, the stage that actually produces the pixels.
 
-![piet-gpu performance comparison graphs](/assets//piet-gpu-performance.png)
+![piet-gpu performance comparison graphs](https://raphlinus.github.io/assets//piet-gpu-performance.png)
 
 These measurements are done on a four-core i7-7700HQ processor; with more cores, the CPU time would scale down, and vice versa, as Pathfinder is very effective in exploiting multithreading.
 
-At some point, I'd like to do a much more thorough performance comparison, but doing performance measurement of GPU is surprisingly difficult, so I want to take the time to do it properly. In the meantime, here are rough numbers from the current master version of Pathfinder running on GTX 1060: tiger 2.3ms (of which GPU is 0.7), paper-1 7.3ms (GPU 1.1ms), and paris-30k 83ms (GPU 15.5ms). On Intel 630, the total time is only slightly larger, with the GPU taking roughly the same amount of time as CPU. Also keep in mind, these figures *do* include flattening, and see below for an update about Pathfinder performance.
+At some point, I'd like to do a much more thorough performance comparison, but doing performance measurement of GPU is surprisingly difficult, so I want to take the time to do it properly. In the meantime, here are rough numbers from the current master version of Pathfinder running on GTX 1060: tiger 2.3ms (of which GPU is 0.7), paper-1 7.3ms (GPU 1.1ms), and paris-30k 83ms (GPU 15.5ms). On Intel 630, the total time is only slightly larger, with the GPU taking roughly the same amount of time as CPU. Also keep in mind, these figures _do_ include flattening, and see below for an update about Pathfinder performance.
 
 ## Prospects
 
@@ -131,23 +132,23 @@ Thanks to Brian Merchant for work on various parts of piet-gpu, msiglreith for h
 There was some [discussion on /r/rust](https://www.reddit.com/r/rust/comments/gv1b95/pietgpu_progress_report/).
 
 [piet-gpu]: https://github.com/linebender/piet-gpu
-[2D Graphics on Modern GPU]: /rust/graphics/gpu/2019/05/08/modern-2d.html
+[2d graphics on modern gpu]: /rust/graphics/gpu/2019/05/08/modern-2d.html
 [gfx-hal]: https://github.com/gfx-rs/gfx
-[Massively-Parallel Vector Graphics]: http://w3.impa.br/~diego/projects/GanEtAl14/
-[Random-Access Rendering of General Vector Graphics]: http://hhoppe.com/ravg.pdf
-[Why are 2D vector graphics so much harder than 3D?]: https://blog.mecheye.net/2019/05/why-is-2d-graphics-is-harder-than-3d-graphics/
-[Multi-channel signed distance fields]: https://github.com/Chlumsky/msdfgen
-[Slug]: https://sluglibrary.com/
-[Inconsolata]: https://github.com/googlefonts/Inconsolata
+[massively-parallel vector graphics]: http://w3.impa.br/~diego/projects/GanEtAl14/
+[random-access rendering of general vector graphics]: http://hhoppe.com/ravg.pdf
+[why are 2d vector graphics so much harder than 3d?]: https://blog.mecheye.net/2019/05/why-is-2d-graphics-is-harder-than-3d-graphics/
+[multi-channel signed distance fields]: https://github.com/Chlumsky/msdfgen
+[slug]: https://sluglibrary.com/
+[inconsolata]: https://github.com/googlefonts/Inconsolata
 [microtypography]: http://www.pragma-ade.nl/pdftex/thesis.pdf
-[flattening quadratic Béziers]: https://raphlinus.github.io/graphics/curves/2019/12/23/flatten-quadbez.html
-[Precise Flattening of Cubic Bézier Segments]: https://pdfs.semanticscholar.org/8963/c06a92d6ca8868348b0930bbb800ff6e7920.pdf
-[A taste of GPU Compute]: https://news.ycombinator.com/item?id=22880502
-[Spinel]: https://fuchsia.googlesource.com/fuchsia/+/refs/heads/master/src/graphics/lib/compute/spinel/
-[Pathfinder]: https://github.com/servo/pathfinder
-[CALayer]: https://developer.apple.com/documentation/quartzcore/calayer
-[Flutter's Rendering Pipeline]: https://www.youtube.com/watch?v=UUfXWzp0-DU
-[Jetpack Compose]: https://developer.android.com/jetpack/compose
-[RenderNode]: https://developer.android.com/reference/android/graphics/RenderNode
+[flattening quadratic béziers]: https://raphlinus.github.io/graphics/curves/2019/12/23/flatten-quadbez.html
+[precise flattening of cubic bézier segments]: https://pdfs.semanticscholar.org/8963/c06a92d6ca8868348b0930bbb800ff6e7920.pdf
+[a taste of gpu compute]: https://news.ycombinator.com/item?id=22880502
+[spinel]: https://fuchsia.googlesource.com/fuchsia/+/refs/heads/master/src/graphics/lib/compute/spinel/
+[pathfinder]: https://github.com/servo/pathfinder
+[calayer]: https://developer.apple.com/documentation/quartzcore/calayer
+[flutter's rendering pipeline]: https://www.youtube.com/watch?v=UUfXWzp0-DU
+[jetpack compose]: https://developer.android.com/jetpack/compose
+[rendernode]: https://developer.android.com/reference/android/graphics/RenderNode
 [piet-gpu#15]: https://github.com/linebender/piet-gpu/pull/15
 [piet-gpu-derive]: https://github.com/linebender/piet-gpu/tree/master/piet-gpu-derive

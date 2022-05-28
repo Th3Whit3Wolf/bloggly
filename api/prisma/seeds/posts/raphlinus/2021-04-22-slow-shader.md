@@ -1,9 +1,10 @@
 ---
 layout: post
-title:  "The case of the curiously slow shader"
-date:   2021-04-28 07:53:42 -0700
+title: "The case of the curiously slow shader"
+date: 2021-04-28 07:53:42 -0700
 categories: [gpu]
 ---
+
 These days, a significant amount of my time and energy is getting [piet-gpu], a compute-focused 2D rendering engine, to run well on mobile hardware. Not too long ago, I got it running on Pixel 4, and breathlessly waited for the performance numbers, which turned out to be... disappointing. I was able to figure out why, but therein lies a story.
 
 To track this down, I had to dive pretty deep into the lower levels of GPU infrastructure, and learned a lot in the process. And I'll end with a look into the Vulkan memory model and why it could help with these performance portability concerns going forward.
@@ -18,7 +19,7 @@ The test is rendering a Ghostscript tiger at a resolution of 1088x2288 pixels. T
 
 <img src="/assets/gpu_intel_630_timings.png" width="608" alt="Timings of Intel 630" />
 
-Running the same workload on a Pixel 4 gave much worse results. The first six stages take a total of 2.45ms, but the fine rasterization stage is 11.7ms, which is *much* slower than the Intel reference. Further, it's very dependent on this CHUNK parameter, which if nothing else is evidence that the performance characteristics are very different.
+Running the same workload on a Pixel 4 gave much worse results. The first six stages take a total of 2.45ms, but the fine rasterization stage is 11.7ms, which is _much_ slower than the Intel reference. Further, it's very dependent on this CHUNK parameter, which if nothing else is evidence that the performance characteristics are very different.
 
 <img src="/assets/gpu_adreno_640_timings.png" width="608" alt="Timings of Adreno 640" />
 
@@ -34,7 +35,7 @@ These performance counters are especially useful for ruling out some hypotheses.
 
 At first, I couldn't get AGI to work, but [upgrading to the 1.1 dev version](https://github.com/google/agi/issues/760) fixed that problem.
 
-![Screenshot of Android GPU inspector](/assets/gpu_agi_screenshot.png)
+![Screenshot of Android GPU inspector](https://raphlinus.github.io/assets/gpu_agi_screenshot.png)
 
 When I did get it running, initially the information didn't seem very useful. The one thing that stood out was very low ALU utilization, which wasn't a surprise considering the other things I was seeing.
 
@@ -68,7 +69,7 @@ The way this works in piet-gpu is that the earlier stages of the pipeline (coars
 
 ## Reading shader assembly
 
-At this point, I had no desire to remain an ignoramus; I felt that we must know what's really going on, and determined that we shall know. The next step was to [read shader assembly][How To Read Shader Assembly].
+At this point, I had no desire to remain an ignoramus; I felt that we must know what's really going on, and determined that we shall know. The next step was to [read shader assembly][how to read shader assembly].
 
 For certain GPUs, especially Radeon, this is easy, as the shader compiler is open source and widely available. In fact, the Radeon shader analyzer is available on the [Shader playground], a resource analogous to [Godbolt] for shaders. But for mobile GPUs, it's a bit harder, as the vendor drivers are proprietary.
 
@@ -90,7 +91,7 @@ But in the sad path, the same memory buffer is being read with the `ldib` (LoaD 
 
 Checking in with [Rob Clark], the author of Freedreno, who now works at Google also, yielded more insight. The `isam` instruction goes through the texture cache (TPL1), while the `ldib` instruction bypasses that and goes straight to memory.
 
-The last piece of the mystery was *why* the compiler was doing that. Again Rob provided the needed insight. Because the shader is reading and writing to the same memory, it is being conservative about cache coherency; it wants to avoid situations where the shader writes to memory, then another thread reads from memory and gets stale data. Bypassing the cache avoids that risk.
+The last piece of the mystery was _why_ the compiler was doing that. Again Rob provided the needed insight. Because the shader is reading and writing to the same memory, it is being conservative about cache coherency; it wants to avoid situations where the shader writes to memory, then another thread reads from memory and gets stale data. Bypassing the cache avoids that risk.
 
 In this case, the actual memory locations for reading path data and for storing the clip stack are disjoint, so there's no such risk. We use the same buffer partly for convenience and partly so there's one free space pool; if there were multiple buffers, then one buffer might run out of memory while there's plenty of free space in another, which would be unfortunate.
 
@@ -100,21 +101,21 @@ Given this knowledge, a fix is fairly straightforward, and we also know how to a
 
 In the middle of the investigation, I viewed the proprietary shader compiler with extreme suspicion: it's making my code run slow, for no good reason that I could see, and also not matching the performance expectations set by other (desktop) GPUs. But now I understand much better why it's doing that.
 
-Even so, in the longer term I think it's possible to do much better, and I believe the key to that is the [Vulkan memory model]. (I've written about this before in my [prefix sum][Prefix sum on Vulkan] blog post, but at that time I did not observe a substantial performance difference and this time I do.)
+Even so, in the longer term I think it's possible to do much better, and I believe the key to that is the [Vulkan memory model]. (I've written about this before in my [prefix sum][prefix sum on vulkan] blog post, but at that time I did not observe a substantial performance difference and this time I do.)
 
-As in the [CPU case,][Memory Consistency Models: A Tutorial] the memory model is an abstraction over certain hardware and compiler mechanisms that can either uphold or break assumptions about memory coherence. And in both cases, it's all about the program *explicitly* indicating what guarantees it needs, so the shader compiler and hardware are free to apply whatever optimizations they like, as long as the semantics are respected.
+As in the [CPU case,][memory consistency models: a tutorial] the memory model is an abstraction over certain hardware and compiler mechanisms that can either uphold or break assumptions about memory coherence. And in both cases, it's all about the program _explicitly_ indicating what guarantees it needs, so the shader compiler and hardware are free to apply whatever optimizations they like, as long as the semantics are respected.
 
-On an Intel CPU, respecting the memory model is fairly simple; its total store order takes care of most of it, but in certain cases (sequential consistency semantics), the compiler needs to emit a `lock` prefix. It also needs to avoid reordering memory accesses around atomic operations in certain cases. A major motivation for the memory model is that ARM (and most other chips) are a bit more demanding; for acquire and release semantics, the compiler needs to emit barrier instructions or special load-acquire and store-release versions of vanilla load and store instructions. The memory model lets you write your code *once,* then it is compiled to efficient and reliable assembly code as needed by the target architecture. In particular, when only relaxed semantics are needed, generally there is no additional cost.
+On an Intel CPU, respecting the memory model is fairly simple; its total store order takes care of most of it, but in certain cases (sequential consistency semantics), the compiler needs to emit a `lock` prefix. It also needs to avoid reordering memory accesses around atomic operations in certain cases. A major motivation for the memory model is that ARM (and most other chips) are a bit more demanding; for acquire and release semantics, the compiler needs to emit barrier instructions or special load-acquire and store-release versions of vanilla load and store instructions. The memory model lets you write your code _once,_ then it is compiled to efficient and reliable assembly code as needed by the target architecture. In particular, when only relaxed semantics are needed, generally there is no additional cost.
 
-On a GPU, much more can go wrong, but the principles are the same. There are generally more levels of explicit caching, and more opportunities for parallelism, but at the end of the day, the compiler will convert explicit atomic operations with memory order semantics into code that respects that semantics. Depending on the details, it may emit barrier instructions, select load/store instructions that bypass cache (as would be the case here), or other similar mechanisms. Note that the pipeline barriers familiar to all Vulkan programmers are similar, but different in granularity - those generally cause a cache flush and barrier *between* shader dispatches, while the memory model is about enforcing semantics *within* a shader, but possibly between different workgroups, different subgroups, or even different threads (invocations) within a subgroup.
+On a GPU, much more can go wrong, but the principles are the same. There are generally more levels of explicit caching, and more opportunities for parallelism, but at the end of the day, the compiler will convert explicit atomic operations with memory order semantics into code that respects that semantics. Depending on the details, it may emit barrier instructions, select load/store instructions that bypass cache (as would be the case here), or other similar mechanisms. Note that the pipeline barriers familiar to all Vulkan programmers are similar, but different in granularity - those generally cause a cache flush and barrier _between_ shader dispatches, while the memory model is about enforcing semantics _within_ a shader, but possibly between different workgroups, different subgroups, or even different threads (invocations) within a subgroup.
 
-In this particular case, the shader needs only the most relaxed possible memory semantics; each memory write is consumed only by a read on the same thread, which means no special semantics are necessary. Without taking the Vulkan memory model into account, the compiler has no way to know that. The proprietary compiler *does* [report][Pixel 4 at vulkan.gpuinfo.org] that it respects the Vulkan memory model, but it's not lying; if it always generates conservative code and then ticks the "support" bit, it's satisfying the requirements. What is fair to say is that it's missing an opportunity to optimize. Even so, I understand why they haven't prioritized it. When I researched my prefix sum blog post, I didn't find any evidence people were actually writing shaders that used the Vulkan memory model, and I haven't heard of any since.
+In this particular case, the shader needs only the most relaxed possible memory semantics; each memory write is consumed only by a read on the same thread, which means no special semantics are necessary. Without taking the Vulkan memory model into account, the compiler has no way to know that. The proprietary compiler _does_ [report][pixel 4 at vulkan.gpuinfo.org] that it respects the Vulkan memory model, but it's not lying; if it always generates conservative code and then ticks the "support" bit, it's satisfying the requirements. What is fair to say is that it's missing an opportunity to optimize. Even so, I understand why they haven't prioritized it. When I researched my prefix sum blog post, I didn't find any evidence people were actually writing shaders that used the Vulkan memory model, and I haven't heard of any since.
 
 In the above, I'm assuming that relaxed read/writes are as efficient as a memory traffic pattern consisting only of reads. I believe that's true on the Adreno hardware, but might not be universally true. The safest bet is to segregate buffers so that if you have read-only traffic from one of them, it's in a separate buffer from others you may be writing to.
 
 I should also note that these differences in the way compilers handle memory coherence are not in any way specific to mobile vs desktop; it would not have been surprising to see this issue pop up on desktop GPU with very aggressive caching but not on a simpler mobile architecture. As an example of aggressive caching, [RDNA](https://www.amd.com/system/files/documents/rdna-whitepaper.pdf) has some cache attached to a SIMD execution unit, which is not necessarily coherent with caches of other SIMD execution units even in the same workgroup.
 
-Overall, I've found the Adreno 640 to be generally similar to low-end desktop GPUs, at least in terms of the number of registers available per thread, scheduling of subgroups within a processing cluster, etc. There are fewer processing clusters, a slower clock speed, and less memory bandwidth overall, but those should scale fairly smoothly with existing code and are entirely to be expected. There's more detail about the [A6xx Streaming Processor][A6xx SP] at the Freedreno wiki, and my empirical observations are consistent.
+Overall, I've found the Adreno 640 to be generally similar to low-end desktop GPUs, at least in terms of the number of registers available per thread, scheduling of subgroups within a processing cluster, etc. There are fewer processing clusters, a slower clock speed, and less memory bandwidth overall, but those should scale fairly smoothly with existing code and are entirely to be expected. There's more detail about the [A6xx Streaming Processor][a6xx sp] at the Freedreno wiki, and my empirical observations are consistent.
 
 ## Conclusion and thanks
 
@@ -124,20 +125,20 @@ One such slowdown is overly conservative memory coherency. In the future, the Vu
 
 Thanks to Rob Clark for much valuable insight about Adreno ISA, Lei Zhang for pointing me to many useful Adreno (and mobile GPU resources), Hugues Evrard for help with AGI, and Elias Naur for going on this journey with me, as well as tool support in the form of making glGetProgramBinary easy to run.
 
-[Android GPU Inspector]: https://gpuinspector.dev/
-[A6xx SP]: https://gitlab.freedesktop.org/freedreno/freedreno/-/wikis/A6xx-SP
+[android gpu inspector]: https://gpuinspector.dev/
+[a6xx sp]: https://gitlab.freedesktop.org/freedreno/freedreno/-/wikis/A6xx-SP
 [blog post planned about clipping]: https://github.com/raphlinus/raphlinus.github.io/issues/52
-[How To Read Shader Assembly]: https://interplayoflight.wordpress.com/2021/04/18/how-to-read-shader-assembly/
-[Godbolt]: https://godbolt.org/
-[Shader playground]: http://shader-playground.timjones.io/
-[Freedreno]: https://docs.mesa3d.org/drivers/freedreno.html
-[glGetProgramBinary]: https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glGetProgramBinary.xhtml
+[how to read shader assembly]: https://interplayoflight.wordpress.com/2021/04/18/how-to-read-shader-assembly/
+[godbolt]: https://godbolt.org/
+[shader playground]: http://shader-playground.timjones.io/
+[freedreno]: https://docs.mesa3d.org/drivers/freedreno.html
+[glgetprogrambinary]: https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glGetProgramBinary.xhtml
 [disassembly tools]: https://github.com/mesa3d/mesa/blob/master/src/freedreno/decode/pgmdump2.c
 [piet-gpu]: https://github.com/linebender/piet-gpu
 [piet-gpu bug]: https://github.com/linebender/piet-gpu/issues/83
-[vkGetPipelineCacheData]: https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkGetPipelineCacheData.html
-[Rob Clark]: https://www.phoronix.com/scan.php?page=news_item&px=Google-Graphics-Rob-Clark
-[Prefix sum on Vulkan]: https://raphlinus.github.io/gpu/2020/04/30/prefix-sum.html
-[Vulkan memory model]: https://www.khronos.org/blog/comparing-the-vulkan-spir-v-memory-model-to-cs
-[Memory Consistency Models: A Tutorial]: https://www.cs.utexas.edu/~bornholt/post/memory-models.html
-[Pixel 4 at vulkan.gpuinfo.org]: https://vulkan.gpuinfo.org/displayreport.php?id=9426#extensions
+[vkgetpipelinecachedata]: https://www.khronos.org/registry/vulkan/specs/1.2-extensions/man/html/vkGetPipelineCacheData.html
+[rob clark]: https://www.phoronix.com/scan.php?page=news_item&px=Google-Graphics-Rob-Clark
+[prefix sum on vulkan]: https://raphlinus.github.io/gpu/2020/04/30/prefix-sum.html
+[vulkan memory model]: https://www.khronos.org/blog/comparing-the-vulkan-spir-v-memory-model-to-cs
+[memory consistency models: a tutorial]: https://www.cs.utexas.edu/~bornholt/post/memory-models.html
+[pixel 4 at vulkan.gpuinfo.org]: https://vulkan.gpuinfo.org/displayreport.php?id=9426#extensions
