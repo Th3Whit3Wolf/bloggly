@@ -1,5 +1,7 @@
-import { Header } from "./Header";
+import Header from "./Header";
 import SideBar from "./SideBar";
 import LoginForm from "./LoginForm";
 import SignUpForm from "./SignUpForm";
-export { Header, SideBar, LoginForm, SignUpForm };
+import AllPosts from "./AllPosts.jsx";
+import CardPost from "./CardPost";
+export { AllPosts, CardPost, Header, SideBar, LoginForm, SignUpForm };
