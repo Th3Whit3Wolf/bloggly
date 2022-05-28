@@ -35,6 +35,8 @@ const Header = () => {
 				navigate("/");
 			}
 		});
+		setUser({ isLoggedIn: false });
+		navigate("/");
 	};
 
 	const handleLogin = e => {
