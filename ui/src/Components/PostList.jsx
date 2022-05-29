@@ -7,6 +7,7 @@ import {
 	Typography,
 	Pagination
 } from "@mui/material";
+import { useLocation } from "react-router-dom";
 
 import { PostPreview } from "#Components";
 
@@ -14,6 +15,8 @@ const PAGE_SIZE = 5;
 
 const PostList = ({ posts }) => {
 	const theme = useTheme();
+	const location = useLocation();
+	const isUserPost = location.pathname.startsWith("/user");
 	const [page, setPage] = useState(0);
 
 	const pageStart = page * PAGE_SIZE;
@@ -39,7 +42,7 @@ const PostList = ({ posts }) => {
 				textAlign="center"
 				sx={{ mb: "2rem" }}
 			>
-				Your Posts
+				{isUserPost ? "Your Posts" : "All Posts"}
 			</Typography>
 			<Box
 				component="ul"
