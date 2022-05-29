@@ -142,13 +142,29 @@ class PrismaController {
 		limit = Number(limit || this.queryLimit);
 		page = Number(page || 1);
 
-		const data = await this.dbResource.findMany({
-			where: query,
-			take: limit,
-			skip: (page - 1) * limit,
-			...this.queryOpt.read,
-			...this.queryOpt.list
-		});
+		console.log("Limit greater than 0", limit > 0);
+		console.log("Limit greater than 0", limit > 0);
+		console.log("Limit is", limit);
+		console.log("Limit is a number", typeof limit);
+		console.log("Limit greater than 0", limit > 0);
+		console.log("Limit greater than 0", limit > 0);
+		console.log("Limit greater than 0", limit > 0);
+		console.log("Limit greater than 0", limit > 0);
+
+		const data =
+			limit > 0
+				? await this.dbResource.findMany({
+						where: query,
+						take: limit,
+						skip: (page - 1) * limit,
+						...this.queryOpt.read,
+						...this.queryOpt.list
+				  })
+				: await this.dbResource.findMany({
+						where: query,
+						...this.queryOpt.read,
+						...this.queryOpt.list
+				  });
 
 		return res.status(200).send({
 			pagination: {
