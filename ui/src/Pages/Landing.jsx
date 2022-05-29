@@ -1,12 +1,18 @@
-import { useEffect } from "react";
-
-import { Box, Grid, Typography, useTheme } from "@mui/material";
+import { useEffect, forwardRef } from "react";
+import { Box, Grid, Typography, useTheme, Button } from "@mui/material";
 import {
 	EngineeringOutlined as EngineeringOutlinedIcon,
 	AllInclusive as AllInclusiveIcon,
-	PaidOutlined as PaidOutlinedIcon
+	PaidOutlined as PaidOutlinedIcon,
+	Message as MessageIcon
 } from "@mui/icons-material";
+import { NavLink } from "react-router-dom";
+
 import HeroIMG from "../Assets/Imgs/hero.jpg";
+
+const LinkBehavior = forwardRef((props, ref) => (
+	<NavLink ref={ref} to="/" {...props} role={undefined} />
+));
 
 const Landing = () => {
 	const theme = useTheme();
@@ -86,7 +92,7 @@ const Landing = () => {
 						sx={{
 							textAlign: "center",
 							mt: "1vh",
-							mb: "calc(77vh - 11vh - 8.6876rem - 16px)",
+							mb: "calc(77vh - 14vh - 8.6876rem - 16px)",
 							color: "#eee"
 						}}
 					>
@@ -101,6 +107,31 @@ const Landing = () => {
 						}}
 					>
 						come for the blogs and stay for the stuff
+					</Typography>
+					<Typography
+						component="div"
+						sx={{
+							textAlign: "center"
+						}}
+					>
+						<Button
+							variant="contained"
+							aria-label="view posts"
+							data-testid="viewAllPostsButton"
+							component={LinkBehavior}
+							to="/posts"
+							startIcon={<MessageIcon />}
+							sx={{
+								mt: "0.25rem",
+								ml: "0.75rem",
+								p: "6px 16px",
+								borderRadius: "12px",
+								borderColor: theme.palette.gsb.primary,
+								backgroundColor: theme.palette.gsb.primary
+							}}
+						>
+							<Typography variant="body2">View Blogs</Typography>
+						</Button>
 					</Typography>
 				</Grid>
 

@@ -5,7 +5,7 @@ import { LoginForm } from "#Components";
 const Login = () => {
 	const theme = useTheme();
 	useEffect(() => {
-		document.title = "Login ";
+		document.title = "Login";
 	}, []);
 
 	return (

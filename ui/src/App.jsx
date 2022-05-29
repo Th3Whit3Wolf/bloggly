@@ -10,9 +10,16 @@ import {
 	useMediaQuery
 } from "@mui/material";
 
-import { Header, SideBar, AllPosts } from "#Components";
+import { Header, SideBar } from "#Components";
 import { ColorModeContext, UserContext } from "#Context";
-import { Landing, Login, SignUp, PageNotFound } from "#Pages";
+import {
+	AllPosts,
+	Landing,
+	Login,
+	SignUp,
+	PageNotFound,
+	UserPosts
+} from "#Pages";
 import getDesignTokens from "./theme.js";
 
 function App() {
@@ -31,6 +38,22 @@ function App() {
 	const theme = useMemo(() => createTheme(getDesignTokens(mode)), [mode]);
 	const usr = useMemo(() => ({ user, setUser }), [user]);
 
+	const LogInOr = Component => {
+		if (user.isLoggedIn) {
+			return <Component />;
+		} else {
+			return <Navigate to="/login" replace={true} />;
+		}
+	};
+
+	const UserOr = Component => {
+		if (user.isLoggedIn) {
+			return <Navigate to="/user/posts" replace={true} />;
+		} else {
+			return <Component />;
+		}
+	};
+
 	return (
 		<ColorModeContext.Provider value={colorMode}>
 			<UserContext.Provider value={usr}>
@@ -42,61 +65,16 @@ function App() {
 						<Box component="main" sx={{ flexGrow: 1, p: 0 }}>
 							<Toolbar />
 							<Toolbar />
-
 							<Routes>
-								<Route
-									path="/user"
-									element={
-										!user.isLoggedIn ? (
-											<Navigate to="/login" replace={true} />
-										) : (
-											<Outlet />
-										)
-									}
-								>
-									<Route
-										path="posts"
-										element={
-											!user.isLoggedIn ? (
-												<Navigate to="/login" replace={true} />
-											) : (
-												<AllPosts />
-											)
-										}
-									/>
+								<Route path="*" element={<PageNotFound />} />
+								<Route path="/" element={UserOr(Landing)} />
+								<Route path="/login" element={UserOr(Login)} />
+								<Route path="/posts" element={UserOr(AllPosts)} />
+								<Route path="/signup" element={UserOr(SignUp)} />
+								<Route path="/user" element={LogInOr(Outlet)}>
+									<Route path="posts" element={LogInOr(UserPosts)} />
 									<Route path="post/:id" element={<></>} />
 								</Route>
-								<Route
-									path="/"
-									element={
-										user.isLoggedIn ? (
-											<Navigate to="/user" replace={true} />
-										) : (
-											<Landing />
-										)
-									}
-								/>
-								<Route
-									path="/login"
-									element={
-										user.isLoggedIn ? (
-											<Navigate to="/user" replace={true} />
-										) : (
-											<Login />
-										)
-									}
-								/>
-								<Route
-									path="/signup"
-									element={
-										user.isLoggedIn ? (
-											<Navigate to="/user" replace={true} />
-										) : (
-											<SignUp />
-										)
-									}
-								/>
-								<Route path="*" element={<PageNotFound />} />
 							</Routes>
 						</Box>
 					</Box>
