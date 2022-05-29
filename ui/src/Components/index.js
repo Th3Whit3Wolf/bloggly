@@ -5,6 +5,8 @@ import SignUpForm from "./SignUpForm";
 import PostPreview from "./PostPreview.jsx";
 import Notification from "./Notification";
 import PostList from "./PostList";
+import Post from "./Post";
+import MainContainer from "./MainContainer.jsx";
 export {
 	PostList,
 	Header,
@@ -12,5 +14,7 @@ export {
 	LoginForm,
 	SignUpForm,
 	Notification,
-	PostPreview
+	PostPreview,
+	Post,
+	MainContainer
 };

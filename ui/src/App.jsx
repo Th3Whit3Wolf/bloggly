@@ -18,7 +18,8 @@ import {
 	Login,
 	SignUp,
 	PageNotFound,
-	UserPosts
+	UserPosts,
+	Post
 } from "#Pages";
 import getDesignTokens from "./theme.js";
 
@@ -69,11 +70,12 @@ function App() {
 								<Route path="*" element={<PageNotFound />} />
 								<Route path="/" element={UserOr(Landing)} />
 								<Route path="/login" element={UserOr(Login)} />
-								<Route path="/posts" element={UserOr(AllPosts)} />
+								<Route path="/posts" element={<AllPosts />} />
+								<Route path="/post/:id" element={UserOr(Post)} />
 								<Route path="/signup" element={UserOr(SignUp)} />
 								<Route path="/user" element={LogInOr(Outlet)}>
 									<Route path="posts" element={LogInOr(UserPosts)} />
-									<Route path="post/:id" element={<></>} />
+									<Route path="post/:id" element={LogInOr(Post)} />
 								</Route>
 							</Routes>
 						</Box>
