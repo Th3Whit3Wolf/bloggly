@@ -11,14 +11,10 @@ import {
 	ListItemText
 } from "@mui/material";
 
-import { Message as MessageIcon, Home as HomeIcon } from "@mui/icons-material";
+import { Home as HomeIcon, Explore as ExploreIcon } from "@mui/icons-material";
 
 import { UserContext } from "#Context";
-import {
-	useNavigate,
-	useLocation,
-	NavLink as RouterLink
-} from "react-router-dom";
+import { useLocation, NavLink as RouterLink } from "react-router-dom";
 
 const drawerWidth = 240;
 
@@ -107,15 +103,14 @@ const SideBarItems = [
 		text: "Home"
 	},
 	{
-		icon: <MessageIcon />,
-		path: "/blogs",
-		text: "My Blogs"
+		icon: <ExploreIcon />,
+		path: "/posts",
+		text: "Explore Blogs"
 	}
 ];
 
 const SideBar = () => {
 	const theme = useTheme();
-	const navigate = useNavigate();
 
 	const { user } = useContext(UserContext);
 	const [open, setOpen] = useState(false);
@@ -129,17 +124,6 @@ const SideBar = () => {
 	const handleDrawerClose = () => {
 		if (open) {
 			setOpen(false);
-		}
-	};
-
-	const handleListOnClick = (e, path) => {
-		e.preventDefault();
-		console.log(
-			`handleListOnClick (${location} === ${path}) ${location === path}`
-		);
-		if (location !== path) {
-			console.log(`Navigating to ${path}`);
-			//navigate(path);
 		}
 	};
 
