@@ -362,7 +362,7 @@ const SignUpForm = () => {
 								type="submit"
 								fullWidth
 								variant="contained"
-								sx={{ borderWidth: "2px", borderRadius: "12px" }}
+								sx={{ borderWidth: "0px", borderRadius: "12px" }}
 								size="large"
 							>
 								Sign Up

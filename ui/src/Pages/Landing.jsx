@@ -122,10 +122,10 @@ const Landing = () => {
 								key={item.id}
 								sx={{
 									p: "0.25rem 0.5rem",
-									m: "1rem",
+									m: "1rem 2vw",
 									textAlign: "center",
 									backgroundColor: theme.palette.gsb.background,
-									borderRadius: "10px",
+									borderRadius: "12px",
 									maxWidth: "200px",
 									color:
 										theme.palette.mode === "light"

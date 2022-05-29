@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { forwardRef, useContext, useState, useMemo } from "react";
 import {
 	Box,
 	Toolbar,
@@ -6,7 +6,7 @@ import {
 	styled,
 	Drawer as MuiDrawer,
 	List,
-	ListItemButton,
+	ListItem,
 	ListItemIcon,
 	ListItemText
 } from "@mui/material";
@@ -14,9 +14,48 @@ import {
 import { Message as MessageIcon, Home as HomeIcon } from "@mui/icons-material";
 
 import { UserContext } from "#Context";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link as RouterLink } from "react-router-dom";
 
 const drawerWidth = 240;
+
+const ListItemLink = props => {
+	const { icon, primary, theme, to } = props;
+
+	const renderLink = useMemo(
+		() =>
+			forwardRef(function Link(itemProps, ref) {
+				return <RouterLink to={to} ref={ref} {...itemProps} role={undefined} />;
+			}),
+		[to]
+	);
+
+	return (
+		<li>
+			<ListItem
+				button
+				component={renderLink}
+				sx={{
+					"&.Mui-selected": {
+						backgroundColor: theme.palette.selected
+					},
+					"&.MuiListItem-root:hover": {
+						backgroundColor: theme.palette.hover.list
+					}
+				}}
+			>
+				{icon ? (
+					<ListItemIcon sx={{ color: theme.palette.gsb.primary }}>
+						{icon}
+					</ListItemIcon>
+				) : null}
+				<ListItemText
+					primary={primary}
+					sx={{ color: theme.palette.gsb.primary }}
+				/>
+			</ListItem>
+		</li>
+	);
+};
 
 const Drawer = styled(MuiDrawer, {
 	shouldForwardProp: prop => prop !== "open"
@@ -116,27 +155,12 @@ const SideBar = () => {
 				{user.isLoggedIn &&
 					SideBarItems.map(item => (
 						<List key={item.text} disablePadding>
-							<ListItemButton
-								data-testid={`SideBar List Item ${item.text}`}
-								selected={location === item.path}
-								onClick={e => handleListOnClick(e, item.path)}
-								sx={{
-									"&.Mui-selected": {
-										backgroundColor: theme.palette.selected
-									},
-									"&.MuiListItemButton-root:hover": {
-										backgroundColor: theme.palette.hover.list
-									}
-								}}
-							>
-								<ListItemIcon sx={{ color: theme.palette.gsb.primary }}>
-									{item.icon}
-								</ListItemIcon>
-								<ListItemText
-									primary={item.text}
-									sx={{ color: theme.palette.gsb.primary }}
-								/>
-							</ListItemButton>
+							<ListItemLink
+								icon={item.icon}
+								primary={item.text}
+								to={item.path}
+								theme={theme}
+							/>
 						</List>
 					))}
 			</Box>

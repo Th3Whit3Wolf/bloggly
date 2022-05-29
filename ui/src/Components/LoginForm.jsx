@@ -278,10 +278,10 @@ const LoginForm = () => {
 								type="submit"
 								fullWidth
 								variant="contained"
-								sx={{ borderWidth: "2px", borderRadius: "12px" }}
+								sx={{ borderWidth: "0px", borderRadius: "12px" }}
 								size="large"
 							>
-								log in
+								Log In
 							</Button>
 						</Grid>
 						<Grid item sx={{ ml: 1, mt: 1 }}>

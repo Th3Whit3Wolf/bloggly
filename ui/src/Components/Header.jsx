@@ -125,7 +125,6 @@ const Header = () => {
 								variant="contained"
 								sx={{
 									mt: "0.25rem",
-
 									borderRadius: "12px",
 									borderColor: theme.palette.gsb.primary,
 									backgroundColor: theme.palette.gsb.primary,
@@ -155,17 +154,13 @@ const Header = () => {
 									sx={{
 										mt: "0.25rem",
 										ml: "0.75rem",
-										width: "90px",
 										borderRadius: "12px",
 										borderColor: theme.palette.gsb.primary,
 										backgroundColor: theme.palette.gsb.primary,
-										flexShrink: 0,
-										textTransform: "none"
+										flexShrink: 0
 									}}
 								>
-									<Typography variant="p" sx={{ p: 0 }}>
-										Log Out
-									</Typography>
+									<Typography variant="body2">Log Out</Typography>
 								</Button>
 							)) || (
 								<>
