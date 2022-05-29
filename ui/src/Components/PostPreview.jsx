@@ -1,15 +1,15 @@
-import { forwardRef } from "react";
-
-import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
-
+import { forwardRef, useContext } from "react";
 import { NavLink } from "react-router-dom";
+import { Typography, useTheme, Button, Box, Avatar } from "@mui/material";
+import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
+import MarkdownPreview from "@uiw/react-markdown-preview";
+import truncateMarkdown from "markdown-truncate";
+
+import { UserContext } from "#Context";
 
 const LinkBehavior = forwardRef((props, ref) => (
 	<NavLink ref={ref} to="/" {...props} role={undefined} />
 ));
-import { Typography, useTheme, Button, Box, Avatar } from "@mui/material";
-import MarkdownPreview from "@uiw/react-markdown-preview";
-import truncateMarkdown from "markdown-truncate";
 
 const PostPreview = ({
 	id: postID,
@@ -22,6 +22,7 @@ const PostPreview = ({
 }) => {
 	const theme = useTheme();
 	const { id: userID, firstName, lastName, username } = user;
+	const { user: User } = useContext(UserContext);
 
 	const contentMD = truncateMarkdown(content, {
 		limit: 100,
@@ -33,6 +34,9 @@ const PostPreview = ({
 				fontWeight="bold"
 				variant="h6"
 				component={LinkBehavior}
+				to={`${
+					User.isLoggedIn && User?.info.id === userID ? "/user" : ""
+				}/post/${postID}`}
 				sx={{
 					mb: 0.5,
 					color: theme.palette.gsb.primary,
@@ -86,7 +90,9 @@ const PostPreview = ({
 				<Button
 					component={LinkBehavior}
 					aria-describedby={`describe-${postID}`}
-					href={`/user/post/${postID}`}
+					to={`${
+						User.isLoggedIn && User?.info.id === userID ? "/user" : ""
+					}/post/${postID}`}
 					id={`describe-${username}-post-${postID}`}
 					size="small"
 					endIcon={<KeyboardArrowRightRoundedIcon />}
