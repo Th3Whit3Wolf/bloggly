@@ -79,7 +79,7 @@ const LoginForm = () => {
 							...user,
 							isLoggedIn: true,
 							posts: [],
-							info: { ...data }
+							info: { ...data.data }
 						});
 					});
 				} else {

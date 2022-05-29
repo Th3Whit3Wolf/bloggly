@@ -19,7 +19,6 @@ import {
 	Logout as LogoutIcon
 } from "@mui/icons-material";
 import { NavLink, useNavigate } from "react-router-dom";
-// Also need a small title shows USER or ADMIN
 
 const LinkBehavior = forwardRef((props, ref) => (
 	<NavLink ref={ref} to="/" {...props} role={undefined} />
@@ -44,11 +43,6 @@ const Header = () => {
 		});
 		setUser({ isLoggedIn: false });
 		navigate("/");
-	};
-
-	const handleSignUp = e => {
-		e.preventDefault();
-		navigate("/signup");
 	};
 
 	return (

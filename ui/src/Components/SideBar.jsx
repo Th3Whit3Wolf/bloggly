@@ -14,13 +14,17 @@ import {
 import { Message as MessageIcon, Home as HomeIcon } from "@mui/icons-material";
 
 import { UserContext } from "#Context";
-import { useNavigate, useLocation, Link as RouterLink } from "react-router-dom";
+import {
+	useNavigate,
+	useLocation,
+	NavLink as RouterLink
+} from "react-router-dom";
 
 const drawerWidth = 240;
 
 const ListItemLink = props => {
 	const { icon, primary, theme, to } = props;
-
+	const location = useLocation();
 	const renderLink = useMemo(
 		() =>
 			forwardRef(function Link(itemProps, ref) {
@@ -33,6 +37,7 @@ const ListItemLink = props => {
 		<li>
 			<ListItem
 				button
+				selected={location.pathname === to}
 				component={renderLink}
 				sx={{
 					"&.Mui-selected": {
@@ -98,7 +103,7 @@ const closedMixin = thm => ({
 const SideBarItems = [
 	{
 		icon: <HomeIcon />,
-		path: "/user",
+		path: "/user/posts",
 		text: "Home"
 	},
 	{
@@ -111,7 +116,6 @@ const SideBarItems = [
 const SideBar = () => {
 	const theme = useTheme();
 	const navigate = useNavigate();
-	const location = useLocation();
 
 	const { user } = useContext(UserContext);
 	const [open, setOpen] = useState(false);
