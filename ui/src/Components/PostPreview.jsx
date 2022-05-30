@@ -75,7 +75,7 @@ const PostPreview = ({
 				}}
 			>
 				<Box sx={{ position: "relative", pl: "0.5rem" }}>
-					<Typography variant="body2" fontWeight="bold">
+					<Typography variant="body2" fontWeight="bold" color="primary">
 						{firstName} {lastName}
 					</Typography>
 
