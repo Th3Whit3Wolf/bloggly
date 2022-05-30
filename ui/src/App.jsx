@@ -78,6 +78,7 @@ function App() {
 									<Route path="post/:id" element={LogInOr(Post)} />
 								</Route>
 							</Routes>
+							<Toolbar />
 						</Box>
 					</Box>
 				</ThemeProvider>
