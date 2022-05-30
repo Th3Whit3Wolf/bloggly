@@ -8,10 +8,15 @@ import {
 	List,
 	ListItem,
 	ListItemIcon,
-	ListItemText
+	ListItemText,
+	ListSubheader
 } from "@mui/material";
 
-import { Home as HomeIcon, Explore as ExploreIcon } from "@mui/icons-material";
+import {
+	Home as HomeIcon,
+	Explore as ExploreIcon,
+	AddCircle as AddCircleIcon
+} from "@mui/icons-material";
 
 import { UserContext } from "#Context";
 import { useLocation, NavLink as RouterLink } from "react-router-dom";
@@ -140,17 +145,52 @@ const SideBar = () => {
 			<Toolbar />
 			<Toolbar />
 			<Box sx={{ overflow: "hidden" }}>
-				{user.isLoggedIn &&
-					SideBarItems.map(item => (
-						<List key={item.text} disablePadding>
+				{user.isLoggedIn && (
+					<>
+						<ListSubheader
+							component="div"
+							id="sidebar-navigation-subheader"
+							sx={{
+								pl: "4rem",
+								color: theme.palette.primary.main,
+								fontSize: "1.125rem",
+								fontWeight: "bold"
+							}}
+						>
+							Navigation
+						</ListSubheader>
+						{SideBarItems.map(item => (
+							<List key={item.text} disablePadding>
+								<ListItemLink
+									icon={item.icon}
+									primary={item.text}
+									to={item.path}
+									theme={theme}
+								/>
+							</List>
+						))}
+						<ListSubheader
+							component="div"
+							id="sidebar-navigation-subheader"
+							sx={{
+								pl: "4rem",
+								color: theme.palette.primary.main,
+								fontSize: "1.125rem",
+								fontWeight: "bold"
+							}}
+						>
+							Actions
+						</ListSubheader>
+						<List disablePadding>
 							<ListItemLink
-								icon={item.icon}
-								primary={item.text}
-								to={item.path}
+								icon={<AddCircleIcon />}
+								primary={"New Post"}
+								to="/user/post/new"
 								theme={theme}
 							/>
 						</List>
-					))}
+					</>
+				)}
 			</Box>
 		</Drawer>
 	);
