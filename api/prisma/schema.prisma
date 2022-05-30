@@ -31,7 +31,7 @@ model Post {
 
   /// Define possible relationship with User
   /// Rename collumn to conform to SQL naming conventions
-  user   User? @relation(fields: [userID], references: [id])
+  user   User? @relation(fields: [userID], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userID Int?  @map("user_id")
 
   title   String @db.VarChar(255)

@@ -142,15 +142,6 @@ class PrismaController {
 		limit = Number(limit || this.queryLimit);
 		page = Number(page || 1);
 
-		console.log("Limit greater than 0", limit > 0);
-		console.log("Limit greater than 0", limit > 0);
-		console.log("Limit is", limit);
-		console.log("Limit is a number", typeof limit);
-		console.log("Limit greater than 0", limit > 0);
-		console.log("Limit greater than 0", limit > 0);
-		console.log("Limit greater than 0", limit > 0);
-		console.log("Limit greater than 0", limit > 0);
-
 		const data =
 			limit > 0
 				? await this.dbResource.findMany({
@@ -235,15 +226,14 @@ class PrismaController {
 			const id = parseInt(idStr);
 			try {
 				await this.dbResource.delete({
-					where: { id },
-					...this.queryOptions.delete
+					where: { id }
 				});
 
 				return res.status(204).send();
 			} catch (err) {
 				return res
 					.status(500)
-					.send({ message: this.errorMessages.delete });
+					.send({ message: this.errorMessages.delete, error: err });
 			}
 		} catch (err) {
 			return res.status(400).send({ message: "Unable parse ID" });
