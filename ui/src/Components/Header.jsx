@@ -33,7 +33,7 @@ const Header = () => {
 	const handleLogOut = e => {
 		e.preventDefault();
 		fetch(
-			import.meta.env.PROD
+			process.env.NODE_ENV
 				? "https://bloggly-api.herokuapp.com/api/v1/logout"
 				: "http://localhost:8081/api/v1/logout"
 		).then(res => {

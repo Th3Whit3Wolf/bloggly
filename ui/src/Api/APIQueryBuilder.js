@@ -1,5 +1,5 @@
 const baseURL =
-	import.meta.env.PROD == "production"
+	process.env.NODE_ENV == "production"
 		? "https://https://bloggly-api.herokuapp.com/api/v1"
 		: "http://localhost:8081/api/v1";
 

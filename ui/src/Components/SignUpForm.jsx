@@ -63,7 +63,7 @@ const SignUpForm = () => {
 		event.preventDefault();
 		const { username, firstName, lastName, password } = values;
 		fetch(
-			import.meta.env.PROD
+			process.env.NODE_ENV
 				? "https://bloggly-api.herokuapp.com/api/v1/register"
 				: "http://localhost:8081/api/v1/register",
 			{
