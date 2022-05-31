@@ -14,6 +14,7 @@ import { Header, SideBar } from "#Components";
 import { ColorModeContext, UserContext } from "#Context";
 import {
 	AllPosts,
+	CreatePost,
 	Landing,
 	Login,
 	SignUp,
@@ -75,6 +76,7 @@ function App() {
 								<Route path="/signup" element={UserOr(SignUp)} />
 								<Route path="/user" element={LogInOr(Outlet)}>
 									<Route path="posts" element={LogInOr(UserPosts)} />
+									<Route path="post/new" element={<CreatePost />} />
 									<Route path="post/:id" element={LogInOr(Post)} />
 								</Route>
 							</Routes>

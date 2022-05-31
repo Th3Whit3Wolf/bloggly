@@ -5,4 +5,14 @@ import Landing from "./Landing";
 import UserPosts from "./UserPosts";
 import AllPosts from "./AllPosts";
 import Post from "./Post.jsx";
-export { AllPosts, Landing, Login, SignUp, PageNotFound, UserPosts, Post };
+import CreatePost from "./CreatePost";
+export {
+	AllPosts,
+	CreatePost,
+	Landing,
+	Login,
+	SignUp,
+	PageNotFound,
+	UserPosts,
+	Post
+};

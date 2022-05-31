@@ -7,6 +7,7 @@ import Notification from "./Notification";
 import PostList from "./PostList";
 import Post from "./Post";
 import MainContainer from "./MainContainer.jsx";
+import NewPost from "./NewPost";
 export {
 	PostList,
 	Header,
@@ -16,5 +17,6 @@ export {
 	Notification,
 	PostPreview,
 	Post,
+	NewPost,
 	MainContainer
 };
