@@ -42,7 +42,7 @@ const Header = () => {
 			}
 		});
 		setUser({ isLoggedIn: false });
-		navigate("/");
+		navigate("/", { replace: true });
 	};
 
 	return (
