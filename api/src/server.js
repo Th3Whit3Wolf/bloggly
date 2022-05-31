@@ -5,7 +5,7 @@ const cookieParser = require("cookie-parser");
 const cookieSession = require("cookie-session");
 
 const expressPino = require("express-pino-logger");
-const cors = require("cors");
+// const cors = require("cors");
 
 const { logger } = require("./config");
 const routes = require("./routes");
@@ -38,35 +38,38 @@ app.use(
 );
 app.use(log);
 
-app.use(cors());
+// app.use(cors());
 
-if (NODE_ENV === "production") {
-	app.use(
-		cors(/* {
-			origin: "https://bloggly-ui.herokuapp.com/",
-			allowedHeaders:
-				"Origin, X-Requested-With, Content-Type, Accept, Authorization",
-			methods: ["GET", "PUT", "POST", "DELETE"]
-		} */)
-	);
-} else {
-	app.use((req, res, next) => {
-		res.header({
-			"Access-Control-Allow-Origin": "http://localhost:3000"
-		});
-		res.header({
-			"Access-Control-Allow-Headers":
-				"Origin, X-Requested-With, Content-Type, Accept, Authorization"
-		});
-		res.header({
-			"Access-Control-Allow-Methods": "GET, POST, PUT, DELETE"
-		});
-		res.header({
-			"Cross-Origin-Resource-Policy": "same-site"
-		});
-		next();
+// if (NODE_ENV === "production") {
+// 	app.use(
+// 		cors(/* {
+// 			origin: "https://bloggly-ui.herokuapp.com/",
+// 			allowedHeaders:
+// 				"Origin, X-Requested-With, Content-Type, Accept, Authorization",
+// 			methods: ["GET", "PUT", "POST", "DELETE"]
+// 		} */)
+// 	);
+// } else {
+app.use((req, res, next) => {
+	res.header({
+		"Access-Control-Allow-Origin":
+			NODE_ENV === "production"
+				? "https://bloggly-api.herokuapp.com/"
+				: "http://localhost:3000"
 	});
-}
+	res.header({
+		"Access-Control-Allow-Headers":
+			"Origin, X-Requested-With, Content-Type, Accept, Authorization"
+	});
+	res.header({
+		"Access-Control-Allow-Methods": "GET, POST, PUT, DELETE"
+	});
+	res.header({
+		"Cross-Origin-Resource-Policy": "same-site"
+	});
+	next();
+});
+// }
 app.use(express.json());
 
 /*
