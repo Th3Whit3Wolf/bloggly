@@ -72,7 +72,7 @@ function App() {
 								<Route path="/" element={UserOr(Landing)} />
 								<Route path="/login" element={UserOr(Login)} />
 								<Route path="/posts" element={<AllPosts />} />
-								<Route path="/post/:id" element={UserOr(Post)} />
+								<Route path="/post/:id" element={<Post />} />
 								<Route path="/signup" element={UserOr(SignUp)} />
 								<Route path="/user" element={LogInOr(Outlet)}>
 									<Route path="posts" element={LogInOr(UserPosts)} />
