@@ -17,7 +17,7 @@ const log = expressPino({
 	logger
 });
 
-app.use(helmet({ crossOriginResourcePolicy: { policy: "same-origin" } }));
+app.use(helmet({ crossOriginResourcePolicy: { policy: "same-site" } }));
 app.use(cookieParser());
 app.use(
 	actuator({
