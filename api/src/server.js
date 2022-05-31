@@ -38,14 +38,7 @@ app.use(
 );
 app.use(log);
 
-app.use(
-	cors({
-		origin:
-			NODE_ENV === "production"
-				? "https://bloggly-ui.herokuapp.com/"
-				: "http://localhost:3000"
-	})
-);
+app.use(cors());
 
 // if (NODE_ENV === "production") {
 // 	app.use(
