@@ -59,6 +59,7 @@ const a11yProps = index => {
 
 /*
  * Tab panel for editing and previewing post content
+ * This should be moved into a separate component
  */
 const TabPanel = props => {
 	const { children, value, index, ...other } = props;
