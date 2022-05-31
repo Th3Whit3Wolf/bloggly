@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { forwardRef, useContext, useState, useMemo } from "react";
 import {
 	Box,
 	Toolbar,
@@ -6,17 +6,62 @@ import {
 	styled,
 	Drawer as MuiDrawer,
 	List,
-	ListItemButton,
+	ListItem,
 	ListItemIcon,
-	ListItemText
+	ListItemText,
+	ListSubheader
 } from "@mui/material";
 
-import { Message as MessageIcon } from "@mui/icons-material";
+import {
+	Home as HomeIcon,
+	Explore as ExploreIcon,
+	AddCircle as AddCircleIcon
+} from "@mui/icons-material";
 
 import { UserContext } from "#Context";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation, NavLink as RouterLink } from "react-router-dom";
 
 const drawerWidth = 240;
+
+const ListItemLink = props => {
+	const { icon, primary, theme, to } = props;
+	const location = useLocation();
+	const renderLink = useMemo(
+		() =>
+			forwardRef(function Link(itemProps, ref) {
+				return <RouterLink to={to} ref={ref} {...itemProps} role={undefined} />;
+			}),
+		[to]
+	);
+
+	return (
+		<li>
+			<ListItem
+				button
+				selected={location.pathname === to}
+				component={renderLink}
+				sx={{
+					"&.Mui-selected": {
+						backgroundColor: theme.palette.selected
+					},
+					"&.MuiListItem-root:hover": {
+						backgroundColor: theme.palette.hover.list
+					}
+				}}
+			>
+				{icon ? (
+					<ListItemIcon sx={{ color: theme.palette.gsb.primary }}>
+						{icon}
+					</ListItemIcon>
+				) : null}
+				<ListItemText
+					primary={primary}
+					sx={{ color: theme.palette.gsb.primary }}
+				/>
+			</ListItem>
+		</li>
+	);
+};
 
 const Drawer = styled(MuiDrawer, {
 	shouldForwardProp: prop => prop !== "open"
@@ -58,16 +103,19 @@ const closedMixin = thm => ({
 
 const SideBarItems = [
 	{
-		icon: <MessageIcon />,
-		path: "/blogs",
-		text: "My Blogs"
+		icon: <HomeIcon />,
+		path: "/user/posts",
+		text: "Home"
+	},
+	{
+		icon: <ExploreIcon />,
+		path: "/posts",
+		text: "Explore Blogs"
 	}
 ];
 
 const SideBar = () => {
 	const theme = useTheme();
-	const navigate = useNavigate();
-	const location = useLocation();
 
 	const { user } = useContext(UserContext);
 	const [open, setOpen] = useState(false);
@@ -84,17 +132,6 @@ const SideBar = () => {
 		}
 	};
 
-	const handleListOnClick = (e, path) => {
-		e.preventDefault();
-		console.log(
-			`handleListOnClick (${location} === ${path}) ${location === path}`
-		);
-		if (location !== path) {
-			console.log(`Navigating to ${path}`);
-			//navigate(path);
-		}
-	};
-
 	return (
 		<Drawer
 			variant="permanent"
@@ -102,38 +139,58 @@ const SideBar = () => {
 			onMouseEnter={handleDrawerOpen}
 			onMouseLeave={handleDrawerClose}
 			sx={{
-				display: location.pathname !== "/dashboard" ? "none" : "block"
+				display: user.isLoggedIn ? "block" : "none"
 			}}
 		>
 			<Toolbar />
 			<Toolbar />
 			<Box sx={{ overflow: "hidden" }}>
-				{user?.isLoggedIn &&
-					SideBarItems.map(item => (
-						<List key={item.text} disablePadding>
-							<ListItemButton
-								data-testid={`SideBar List Item ${item.text}`}
-								selected={location === item.path}
-								onClick={e => handleListOnClick(e, item.path)}
-								sx={{
-									"&.Mui-selected": {
-										backgroundColor: theme.palette.selected
-									},
-									"&.MuiListItemButton-root:hover": {
-										backgroundColor: theme.palette.hover.list
-									}
-								}}
-							>
-								<ListItemIcon sx={{ color: theme.palette.gsb.primary }}>
-									{item.icon}
-								</ListItemIcon>
-								<ListItemText
+				{user.isLoggedIn && (
+					<>
+						<ListSubheader
+							component="div"
+							id="sidebar-navigation-subheader"
+							sx={{
+								pl: "4rem",
+								color: theme.palette.primary.main,
+								fontSize: "1.125rem",
+								fontWeight: "bold"
+							}}
+						>
+							Navigation
+						</ListSubheader>
+						{SideBarItems.map(item => (
+							<List key={item.text} disablePadding>
+								<ListItemLink
+									icon={item.icon}
 									primary={item.text}
-									sx={{ color: theme.palette.gsb.primary }}
+									to={item.path}
+									theme={theme}
 								/>
-							</ListItemButton>
+							</List>
+						))}
+						<ListSubheader
+							component="div"
+							id="sidebar-navigation-subheader"
+							sx={{
+								pl: "4rem",
+								color: theme.palette.primary.main,
+								fontSize: "1.125rem",
+								fontWeight: "bold"
+							}}
+						>
+							Actions
+						</ListSubheader>
+						<List disablePadding>
+							<ListItemLink
+								icon={<AddCircleIcon />}
+								primary={"New Post"}
+								to="/user/post/new"
+								theme={theme}
+							/>
 						</List>
-					))}
+					</>
+				)}
 			</Box>
 		</Drawer>
 	);

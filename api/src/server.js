@@ -1,8 +1,9 @@
 const express = require("express");
 const helmet = require("helmet");
-const session = require("express-session");
 const actuator = require("express-actuator");
 const cookieParser = require("cookie-parser");
+const cookieSession = require("cookie-session");
+
 const expressPino = require("express-pino-logger");
 const cors = require("cors");
 
@@ -27,15 +28,12 @@ app.use(
 	})
 );
 app.use(
-	session({
+	cookieSession({
 		secret,
-		saveUninitialized: true,
 		cookie: {
 			maxAge: 1000 * 60 * 60 * 24 /* one day */,
 			secure: NODE_ENV === "production"
-		},
-		proxy: true,
-		resave: false
+		}
 	})
 );
 app.use(log);

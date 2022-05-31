@@ -1,7 +1,7 @@
 const auth = require("./auth");
-// const logout = require("./logout");
-// const register = require("./register");
+const posts = require("./posts");
 
 module.exports = {
-	auth
+	auth,
+	posts
 };

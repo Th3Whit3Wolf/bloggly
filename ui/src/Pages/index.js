@@ -2,4 +2,17 @@ import PageNotFound from "./PageNotFound";
 import Login from "./Login";
 import SignUp from "./SignUp";
 import Landing from "./Landing";
-export { Landing, Login, SignUp, PageNotFound };
+import UserPosts from "./UserPosts";
+import AllPosts from "./AllPosts";
+import Post from "./Post.jsx";
+import CreatePost from "./CreatePost";
+export {
+	AllPosts,
+	CreatePost,
+	Landing,
+	Login,
+	SignUp,
+	PageNotFound,
+	UserPosts,
+	Post
+};

@@ -1,6 +1,4 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-
+import { useEffect, forwardRef } from "react";
 import {
 	Box,
 	Grid,
@@ -12,13 +10,20 @@ import {
 import {
 	EngineeringOutlined as EngineeringOutlinedIcon,
 	AllInclusive as AllInclusiveIcon,
-	PaidOutlined as PaidOutlinedIcon
+	PaidOutlined as PaidOutlinedIcon,
+	Message as MessageIcon
 } from "@mui/icons-material";
+import { NavLink } from "react-router-dom";
+
 import HeroIMG from "../Assets/Imgs/hero.jpg";
+import { MainContainer } from "#Components";
+
+const LinkBehavior = forwardRef((props, ref) => (
+	<NavLink ref={ref} to="/" {...props} role={undefined} />
+));
 
 const Landing = () => {
 	const theme = useTheme();
-	const navigate = useNavigate();
 	const sectionItems = [
 		{
 			id: 1,
@@ -58,15 +63,6 @@ const Landing = () => {
 		}
 	];
 
-	const handleLogin = e => {
-		e.preventDefault();
-		navigate("/login");
-	};
-
-	const handleSignUp = e => {
-		e.preventDefault();
-		navigate("/signup");
-	};
 	useEffect(() => {
 		document.title = "Welcome to Bloggly ";
 	}, []);
@@ -74,149 +70,116 @@ const Landing = () => {
 	return (
 		<Box
 			sx={{
-				p: 0,
-				mt: "100px",
-				width: "100%",
-				height: "calc(80vh - 100px)",
+				position: "absolute",
+				top: "100px",
+				left: 0,
+				width: "100vw",
+				height: "77vh",
 				backgroundImage: `url(${HeroIMG})`,
 				backgroundPosition: "center",
 				backgroundRepeat: "no-repeat",
-				backgroundSize: "cover"
+				backgroundSize: "cover",
+				p: 0,
+				m: 0
 			}}
 		>
-			<Grid container spacing={2}>
-				<Grid item xs={12} sx={{ mb: "2rem" }}>
-					<Typography
-						variant="h3"
-						sx={{
-							textAlign: "center",
-							mt: "calc(100px + 10vh)",
-							color: "#fff"
-						}}
-					>
-						Bloggly
-					</Typography>
-					<Typography
-						variant="h4"
-						sx={{
-							textAlign: "center",
-							mt: "1vh",
-							mb: "39vh",
-							color: "#eee"
-						}}
-					>
-						Blogs and stuff
-					</Typography>
-				</Grid>
-				<Grid item xs={2} sx={{ mb: "2rem" }}>
-					<Container
-						disableGutters
-						sx={{
-							display: "flex",
-							flexDirection: "row",
-							justifyContent: "flex-end",
-							color: theme.palette.gsb.text,
-							alignItems: "left",
-							whiteSpace: "no-wrap",
-							pr: "1rem"
-						}}
-					>
-						<Button
-							variant="contained"
-							onClick={handleLogin}
-							data-testid="loginButtonHero"
+			<Container sx={{ pl: "4rem", pr: "4rem", maxWidth: "125ch" }}>
+				<Grid container spacing={2} sx={{ mt: 0, pt: 0 }}>
+					<Grid item xs={12} sx={{ height: "77vh", pt: 0, mt: 0 }}>
+						<Typography
+							variant="h3"
 							sx={{
-								mt: "0.25rem",
-								ml: "0.5rem",
-								borderWidth: "2px",
-								borderRadius: "12px",
-								backgroundColor: theme.palette.gsb.primary,
-								flexShrink: 0
+								textAlign: "center",
+								mt: "10vh",
+								color: "#fff"
 							}}
 						>
-							Log In
-						</Button>
-					</Container>
-				</Grid>
-				<Grid item xs={8} sx={{ mb: "2rem" }}>
-					<Typography
-						variant="h6"
-						sx={{
-							textAlign: "center",
-							color: "#333"
-						}}
-					>
-						come for the blogs and stay for the stuff
-					</Typography>
-				</Grid>
-				<Grid item xs={2} sx={{ mb: "2rem" }}>
-					<Container
-						disableGutters
-						sx={{
-							display: "flex",
-							flexDirection: "row",
-							justifyContent: "flex-start",
-							color: theme.palette.gsb.text,
-							alignItems: "left",
-							whiteSpace: "no-wrap",
-							pr: "1rem"
-						}}
-					>
-						<Button
-							variant="Sign Up"
-							onClick={handleSignUp}
-							data-testid="signupButtonHero"
+							Bloggly
+						</Typography>
+						<Typography
+							variant="h4"
 							sx={{
-								ml: "0.5rem",
-								color: theme.palette.gsb.primary,
-								borderWidth: "2px",
-								borderStyle: "solid",
-								borderRadius: "12px",
-								borderColor: theme.palette.gsb.primary,
-								flexShrink: 0
+								textAlign: "center",
+								mt: "1vh",
+								mb: "calc(77vh - 17vh - 8.6876rem - 16px)",
+								color: "#eee"
 							}}
 						>
-							Sign Up
-						</Button>
-					</Container>
-				</Grid>
-				<Grid item xs={12}>
-					<Grid
-						container
-						spacing={2}
-						sx={{
-							alignItems: "center",
-							justifyContent: "center"
-						}}
-					>
-						{sectionItems.map(item => (
-							<Grid
-								item
-								xs={12}
-								md={3.5}
-								minHeight={300}
-								key={item.id}
+							Blogs and stuff
+						</Typography>
+
+						<Typography
+							variant="h6"
+							sx={{
+								textAlign: "center",
+								color: "#333"
+							}}
+						>
+							come for the blogs and stay for the stuff
+						</Typography>
+						<Typography
+							component="div"
+							sx={{
+								textAlign: "center"
+							}}
+						>
+							<Button
+								variant="contained"
+								aria-label="view posts"
+								data-testid="viewAllPostsButton"
+								component={LinkBehavior}
+								to="/posts"
+								startIcon={<MessageIcon />}
 								sx={{
-									p: "0.25rem 0.5rem",
-									m: "1rem",
-									mt: "2rem",
-									textAlign: "center",
-									backgroundColor: theme.palette.gsb.background,
-									borderRadius: "10px",
-									maxWidth: "200px",
-									color:
-										theme.palette.mode === "light"
-											? theme.palette.hover.table
-											: theme.palette.active
+									mt: "0.25rem",
+									ml: "0.75rem",
+									p: "6px 16px",
+									borderRadius: "12px",
+									borderColor: theme.palette.gsb.primary,
+									backgroundColor: theme.palette.gsb.primary
 								}}
 							>
-								{item.icon}
-								<Typography sx={{ pt: "1rem" }}>{item.sentence}</Typography>
-							</Grid>
-						))}
+								<Typography variant="body2">View Blogs</Typography>
+							</Button>
+						</Typography>
+					</Grid>
+
+					<Grid item xs={12} sx={{ mt: "1rem" }}>
+						<Grid
+							container
+							spacing={2}
+							sx={{
+								alignItems: "center",
+								justifyContent: "center"
+							}}
+						>
+							{sectionItems.map(item => (
+								<Grid
+									item
+									xs={12}
+									md={3.5}
+									minHeight={220}
+									key={item.id}
+									sx={{
+										p: "0.75rem",
+										m: "1rem",
+										textAlign: "center",
+										backgroundColor: theme.palette.gsb.background,
+										borderRadius: "12px",
+										color:
+											theme.palette.mode === "light"
+												? theme.palette.hover.table
+												: theme.palette.active
+									}}
+								>
+									{item.icon}
+									<Typography sx={{ pt: "1rem" }}>{item.sentence}</Typography>
+								</Grid>
+							))}
+						</Grid>
 					</Grid>
 				</Grid>
-			</Grid>
+			</Container>
 		</Box>
 	);
 };

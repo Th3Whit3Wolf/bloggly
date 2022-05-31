@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 
 import {
 	Box,
@@ -12,7 +12,16 @@ import {
 
 import { Header, SideBar } from "#Components";
 import { ColorModeContext, UserContext } from "#Context";
-import { Landing, Login, SignUp, PageNotFound } from "#Pages";
+import {
+	AllPosts,
+	CreatePost,
+	Landing,
+	Login,
+	SignUp,
+	PageNotFound,
+	UserPosts,
+	Post
+} from "#Pages";
 import getDesignTokens from "./theme.js";
 
 function App() {
@@ -31,6 +40,22 @@ function App() {
 	const theme = useMemo(() => createTheme(getDesignTokens(mode)), [mode]);
 	const usr = useMemo(() => ({ user, setUser }), [user]);
 
+	const LogInOr = Component => {
+		if (user.isLoggedIn) {
+			return <Component />;
+		} else {
+			return <Navigate to="/login" replace={true} />;
+		}
+	};
+
+	const UserOr = Component => {
+		if (user.isLoggedIn) {
+			return <Navigate to="/user/posts" replace={true} />;
+		} else {
+			return <Component />;
+		}
+	};
+
 	return (
 		<ColorModeContext.Provider value={colorMode}>
 			<UserContext.Provider value={usr}>
@@ -39,30 +64,24 @@ function App() {
 						<CssBaseline />
 						<Header />
 						<SideBar />
-						<Routes>
-							<Route path="/" element={<Landing />} />
-							<Route
-								path="/login"
-								element={
-									<Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-										<Toolbar />
-										<Toolbar />
-										<Login />
-									</Box>
-								}
-							/>
-							<Route
-								path="/signup"
-								element={
-									<Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-										<Toolbar />
-										<Toolbar />
-										<SignUp />
-									</Box>
-								}
-							/>
-							<Route path="*" element={<PageNotFound />} />
-						</Routes>
+						<Box component="main" sx={{ flexGrow: 1, p: 0 }}>
+							<Toolbar />
+							<Toolbar />
+							<Routes>
+								<Route path="*" element={<PageNotFound />} />
+								<Route path="/" element={UserOr(Landing)} />
+								<Route path="/login" element={UserOr(Login)} />
+								<Route path="/posts" element={<AllPosts />} />
+								<Route path="/post/:id" element={UserOr(Post)} />
+								<Route path="/signup" element={UserOr(SignUp)} />
+								<Route path="/user" element={LogInOr(Outlet)}>
+									<Route path="posts" element={LogInOr(UserPosts)} />
+									<Route path="post/new" element={<CreatePost />} />
+									<Route path="post/:id" element={LogInOr(Post)} />
+								</Route>
+							</Routes>
+							<Toolbar />
+						</Box>
 					</Box>
 				</ThemeProvider>
 			</UserContext.Provider>

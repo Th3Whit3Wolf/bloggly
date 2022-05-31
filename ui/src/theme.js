@@ -211,8 +211,16 @@ const getDesignTokens = mode => ({
                 src: local(''),
                     url(${RobotoMonoWoff2}) format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
                     url(${RobotoMonoWoff}) format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-                }
-      `
+                }`
+		},
+		MuiButton: {
+			styleOverrides: {
+				root: {
+					textTransform: "none",
+					borderStyle: "solid",
+					borderWidth: "2px"
+				}
+			}
 		}
 	},
 	palette: {
