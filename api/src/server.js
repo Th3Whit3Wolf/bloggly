@@ -38,6 +38,8 @@ app.use(
 );
 app.use(log);
 
+app.use(cors());
+
 if (NODE_ENV === "production") {
 	app.use(
 		cors(/* {
