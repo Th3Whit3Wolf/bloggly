@@ -54,7 +54,7 @@ app.use((req, res, next) => {
 	res.header({
 		"Access-Control-Allow-Origin":
 			NODE_ENV === "production"
-				? "https://bloggly-api.herokuapp.com/"
+				? "https://bloggly-ui.herokuapp.com/"
 				: "http://localhost:3000"
 	});
 	res.header({
