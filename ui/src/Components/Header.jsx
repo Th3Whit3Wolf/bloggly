@@ -39,10 +39,10 @@ const Header = () => {
 		).then(res => {
 			if (res.ok) {
 				console.info("Successfully logged out");
+				setUser({ isLoggedIn: false });
+				navigate("/", { replace: true });
 			}
 		});
-		setUser({ isLoggedIn: false });
-		navigate("/", { replace: true });
 	};
 
 	return (
