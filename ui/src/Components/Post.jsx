@@ -1,4 +1,4 @@
-import { forwardRef, useContext, useState, useEffect } from "react";
+import { forwardRef, useContext, useState } from "react";
 import {
 	Box,
 	Button,
@@ -179,7 +179,8 @@ const DeleteDialog = ({ id, handleDelete, theme }) => {
 	);
 };
 
-const Post = ({ id: postID, title, content, user, createdAt, updatedAt }) => {
+/// user and updatedAt are also available
+const Post = ({ id: postID, title, content, createdAt }) => {
 	const location = useLocation();
 	const navigate = useNavigate();
 	const theme = useTheme();
@@ -197,18 +198,6 @@ const Post = ({ id: postID, title, content, user, createdAt, updatedAt }) => {
 
 	const [editModeOn, setEditModeOn] = useState(false);
 	const isUserPost = location.pathname.startsWith("/user");
-	const { id: userID, firstName, lastName, username } = user;
-
-	/*
-    console.log(
-		{ postID },
-		{ title },
-		{ content },
-		{ user },
-		{ createdAt },
-		{ updatedAt }
-	);
-    */
 
 	const notifClose = () => {
 		setNotif({});
@@ -269,6 +258,7 @@ const Post = ({ id: postID, title, content, user, createdAt, updatedAt }) => {
 	};
 
 	const handleEdit = e => {
+		e.preventDefault();
 		setEditModeOn(!editModeOn);
 	};
 
@@ -278,7 +268,7 @@ const Post = ({ id: postID, title, content, user, createdAt, updatedAt }) => {
 		const updatePost = new PostAPI();
 		updatePost
 			.id(postID)
-			.put(newPostData)
+			.update(newPostData)
 			.then(response => {
 				if (response.ok) {
 					setNotif({
@@ -296,11 +286,26 @@ const Post = ({ id: postID, title, content, user, createdAt, updatedAt }) => {
 						.then(data => {
 							if (Array.isArray(data.data)) {
 								setUser({ ...User, posts: [...data.data] });
+								setEditModeOn(false);
 							}
 						});
+				} else {
+					response.json().then(data => {
+						setNotif({
+							title: "Unexpected Error",
+							message: data.message,
+							severity: "err"
+						});
+					});
 				}
 			})
-			.catch(err => {});
+			.catch(err => {
+				setNotif({
+					title: "Unexpected Error",
+					message: err,
+					severity: "err"
+				});
+			});
 	};
 
 	return (
@@ -350,7 +355,7 @@ const Post = ({ id: postID, title, content, user, createdAt, updatedAt }) => {
 				<Grid container spacing={2}>
 					{editModeOn ? <Grid item xs={1}></Grid> : ""}
 
-					<Grid item xs={editModeOn ? 9 : 10}>
+					<Grid item xs={isUserPost ? (editModeOn ? 9 : 10) : 12}>
 						{editModeOn ? (
 							<TextField
 								id="title-input"
@@ -390,54 +395,59 @@ const Post = ({ id: postID, title, content, user, createdAt, updatedAt }) => {
 							</Typography>
 						)}
 					</Grid>
-
-					<Grid item xs={1}>
-						<Button
-							variant="contained"
-							aria-label={editModeOn ? "cancel" : "edit"}
-							data-testid={editModeOn ? "cancelButton" : "editButton"}
-							onClick={handleEdit}
-							sx={{
-								mt: "0.25rem",
-								ml: "0.75rem",
-								borderRadius: "12px",
-								color: theme.palette.gsb.primary,
-								backgroundColor: "transparent",
-								borderWidth: 0,
-								boxShadow: "none"
-							}}
-						>
-							{editModeOn ? <CancelIcon /> : <EditIcon />}
-						</Button>
-					</Grid>
-					<Grid item xs={1}>
-						{editModeOn ? (
-							<Button
-								variant="contained"
-								aria-label={"save"}
-								data-testid={"saveButton"}
-								startIcon={<SaveIcon />}
-								onClick={handleSave}
-								sx={{
-									mt: "0.25rem",
-									ml: "0.75rem",
-									borderRadius: "12px",
-									color: theme.palette.gsb.primary,
-									backgroundColor: "transparent",
-									borderWidth: 0,
-									boxShadow: "none"
-								}}
-							>
-								<Typography variant="body2">Save Changes</Typography>
-							</Button>
-						) : (
-							<DeleteDialog
-								id={postID}
-								handleDelete={handleDelete}
-								theme={theme}
-							/>
-						)}
-					</Grid>
+					{isUserPost ? (
+						<>
+							<Grid item xs={1}>
+								<Button
+									variant="contained"
+									aria-label={editModeOn ? "cancel" : "edit"}
+									data-testid={editModeOn ? "cancelButton" : "editButton"}
+									onClick={handleEdit}
+									sx={{
+										mt: "0.25rem",
+										ml: "0.75rem",
+										borderRadius: "12px",
+										color: theme.palette.gsb.primary,
+										backgroundColor: "transparent",
+										borderWidth: 0,
+										boxShadow: "none"
+									}}
+								>
+									{editModeOn ? <CancelIcon /> : <EditIcon />}
+								</Button>
+							</Grid>
+							<Grid item xs={1}>
+								{editModeOn ? (
+									<Button
+										variant="contained"
+										aria-label={"save"}
+										data-testid={"saveButton"}
+										startIcon={<SaveIcon />}
+										onClick={handleSave}
+										sx={{
+											mt: "0.25rem",
+											ml: "0.75rem",
+											borderRadius: "12px",
+											color: theme.palette.gsb.primary,
+											backgroundColor: "transparent",
+											borderWidth: 0,
+											boxShadow: "none"
+										}}
+									>
+										<Typography variant="body2">Save Changes</Typography>
+									</Button>
+								) : (
+									<DeleteDialog
+										id={postID}
+										handleDelete={handleDelete}
+										theme={theme}
+									/>
+								)}
+							</Grid>
+						</>
+					) : (
+						""
+					)}
 				</Grid>
 			</Box>
 
