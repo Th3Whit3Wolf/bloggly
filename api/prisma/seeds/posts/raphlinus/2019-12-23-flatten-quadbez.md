@@ -10,14 +10,6 @@ categories: [graphics, curves]
     touch-action: none;
   }
 </style>
-<script type="text/x-mathjax-config">
-        MathJax.Hub.Config({
-                tex2jax: {
-                        inlineMath: [['$', '$']]
-                }
-        });
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
 A classic approach to rendering Bézier curves is to _flatten_ them to polylines. There are other possibilities, including working with the Bézier curves analytically, as is done for example in [Random Access Vector Graphics], but converting to polylines still has legs, largely because it's easier to build later stages of a rendering pipeline (especially on a GPU) that work with polylines.
 
@@ -89,16 +81,16 @@ this.y = y;
 
 // Compute an approximation to int (1 + 4x^2) ^ -0.25 dx
 // This isn't especially good but will do.
-function approx_myint(x) {
+function approx*myint(x) {
 const d = 0.67;
-return x / (1 - d + Math.pow(Math.pow(d, 4) + 0.25 _ x _ x, 0.25));
+return x / (1 - d + Math.pow(Math.pow(d, 4) + 0.25 * x \_ x, 0.25));
 }
 
 // Approximate the inverse of the function above.
 // This is better.
-function approx_inv_myint(x) {
+function approx*inv_myint(x) {
 const b = 0.39;
-return x _ (1 - b + Math.sqrt(b _ b + 0.25 _ x _ x));
+return x * (1 - b + Math.sqrt(b _ b + 0.25 _ x \_ x));
 }
 
 class QuadBez {

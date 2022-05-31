@@ -5,16 +5,6 @@ date: 2021-02-19 08:13:42 -0700
 categories: [curves]
 ---
 
-<!-- I should figure out a cleaner way to do this include, rather than cutting and pasting. Ah well.-->
-<script type="text/x-mathjax-config">
-	MathJax.Hub.Config({
-		tex2jax: {
-			inlineMath: [['$', '$']]
-		}
-	});
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
-
 ![Many parallel curve of an Euler spiral, resembling a flower](https://raphlinus.github.io/assets/euler-parallel-flower.svg)
 
 Determining [parallel curves][parallel curve] is one of the basic 2D geometry operations. It has obvious applications in graphics, being the basis of creating a stroke outline from a path, but also in computer aided manufacturing (determining the path of a milling tool with finite radius) and path planning for robotics. There are plenty of solutions in the literature by now, but in this post I propose a cleaner solution.
@@ -29,7 +19,7 @@ There's an implementation of many of these ideas (currently still in PR stage) i
 
 One of the things that makes parallel curves special is that cusps often appear. In particular, a cusp appears whenever the radius of curvature of the source curve matches the offset. This is classified as an [ordinary cusp] and is a feature of many curve families – we'll quantify that a bit more below.
 
-<img src="/assets/euler-parallel-cusp.svg" alt="Parallel curve of an Euler spiral, showing the cusp" class="center">
+<img src="https://raphlinus.github.io/assets/euler-parallel-cusp.svg" alt="Parallel curve of an Euler spiral, showing the cusp" class="center">
 
 A common feature of algorithms for computing parallel curves is identifying the location of the cusp, and subdividing there. That basically means solving for the specific value of curvature (the reciprocal of the offset distance). If the source curve is a cubic Bézier, there can be up to four such cusps, and finding them requires some nontrivial numerical solving.
 
@@ -59,7 +49,7 @@ $$
 
 The equation is graphed below, and clicking on it links to a [Desmos calculator graph](https://www.desmos.com/calculator/qznzk9xnac) with sliders for the parameters.
 
-<a href="https://www.desmos.com/calculator/qznzk9xnac"><img src="/assets/euler-spiral-parallel-cesaro.png" width="400" height="400" class="center"></a>
+<a href="https://www.desmos.com/calculator/qznzk9xnac"><img src="https://raphlinus.github.io/assets/euler-spiral-parallel-cesaro.png" width="400" height="400" class="center"></a>
 
 Here $c$ is a coefficient dependent on the parameters of the spiral. To connect it to the notation in the Wieleitner paper, $c = a / \sqrt{2 l^3}$, and $s_0 = -a^2/{2l}$. I've also made a [Desmos calculator graph](https://www.desmos.com/calculator/imvqywsb8o) that interactively demonstrates the equivalence of this equation and the more involved one from the Wieleitner paper.
 
@@ -67,7 +57,7 @@ There are a number of other curves that have a cusp similar to the above, with c
 
 Other curves with a similar cusp include the [cycloid] (as well as its many variants including epicycloid, hypocycloid, astroid, deltoid, cardioid, and nephroid), as well as the [semicubical parabola]. The latter is of particular interest because it can be exactly represented as a case of a cubic Bézier (it is when the control arms form a symmetrical X).
 
-<img src="/assets/semicubical_parabola.svg" alt="semicubical parabola" class="center">
+<img src="https://raphlinus.github.io/assets/semicubical_parabola.svg" alt="semicubical parabola" class="center">
 
 The parallel curve of the Euler spiral is perfectly cromulent, and, following the tradition of Pythagorean Hodograph curves and their higher-order rational polynomials, we could simply require everything downstream to simply deal with them. But to make that downstream processing easier, we will convert back to piecewise Euler spirals, a more tractable representation.
 
@@ -83,7 +73,7 @@ Section 8.2 of my [thesis] provides a secant method for determining the Euler sp
 
 Geometric Hermite interpolation works well to approximate the parallel curve of an Euler spiral segment with another Euler spiral segment:
 
-<img src="/assets/euler-parallel-approx.svg" alt="Approximation of the parallel curve of an Euler spiral segment" class="center">
+<img src="https://raphlinus.github.io/assets/euler-parallel-approx.svg" alt="Approximation of the parallel curve of an Euler spiral segment" class="center">
 
 The true parallel curve is in blue, and the approximation in red. It has the same rough shape, but bulges out in the middle. We need to be able to estimate that error in order to make a more accurate approximation.
 

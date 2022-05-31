@@ -29,7 +29,7 @@ The optimizer also found a tiny domain where going all the way to zero arm lengt
 
 I now also have some insight into where exactly the jump between the two domains occurs: it's when the center of the segment matches the Euler spiral at about t = 0.606, which I believe is the point where it most closely approximates a parabola. It might be interesting to explore more deeply exactly what's going on there.
 
-<img src="/assets/euler_spiral_with_mark.png" width="400" alt="Euler spiral with mark at t=.606" />
+<img src="https://raphlinus.github.io/assets/euler_spiral_with_mark.png" width="400" alt="Euler spiral with mark at t=.606" />
 
 One way of thinking about this exploration is that cubic Béziers have a large parameter space encompassing both lumpy and smooth curves. The very smoothest are the ones that minimize the Minimum Curvature Variation functional, and we can plot all of them. This map tells you where to look to find them. Happy hunting!
 

@@ -1,17 +1,9 @@
 ---
 layout: post
-title:  "How long is that Bézier?"
-date:   2018-12-28 10:23:42 -0700
+title: "How long is that Bézier?"
+date: 2018-12-28 10:23:42 -0700
 categories: [curves]
 ---
-<script type="text/x-mathjax-config">
-        MathJax.Hub.Config({
-                tex2jax: {
-                        inlineMath: [['$', '$']]
-                }
-        });
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
 One of the fundamental curve algorithms is determining its arclength. For some curves, like lines and circular arcs, it's simple enough, but it gets tricky for Bézier curves. I've implemented these algorithms for my new [kurbo] curves library, and I think the work that went into getting it right makes a good story.
 
@@ -35,7 +27,7 @@ For quadratic Béziers, this integral has a closed form solution. I tried implem
 
 ## The control polygon length approach
 
-In that Stack Overflow post was a reference to "[Adaptive subdivision and the length and energy of Bézier curves][Gravesen]" by Jens Gravesen. My first step was to implement that. Long story short, it's not terrible, but it is possible to do better.
+In that Stack Overflow post was a reference to "[Adaptive subdivision and the length and energy of Bézier curves][gravesen]" by Jens Gravesen. My first step was to implement that. Long story short, it's not terrible, but it is possible to do better.
 
 The insight of the Gravesen paper is that the actual length is always somewhere between the distance between the endpoints (the length of the chord) and the perimeter of the control polygon. And, for a quadratic Bézier, 2/3 the first + 1/3 the second is a reasonably good estimate.
 
@@ -191,19 +183,19 @@ Here's what such a map looks like; smooth Béziers near the bottom left corner (
 
 Given such a map of all possible quadratic Béziers, we can now plot the accuracy of various approximate algorithms. Here's the Gravesen one:
 
-<img src="/assets/gravesen_error_plot.png" width="570" height="520">
+<img src="https://raphlinus.github.io/assets/gravesen_error_plot.png" width="570" height="520">
 
 This is plotted as error on a log-scale. Black and blue are the most accurate (10 and 8 digits of precision), 0 the least. Not surprisingly, we see it do well for nearly straight curves. There's also a line in the middle, but there's nothing special about it; it's just a visual indication that the approximation overshoots on one side and undershoots on the other, so the error happens to be 0 between those two regions.
 
 Now to compare to Legendre-Gauss quadrature. Fortunately there's code for that in [Pomax/BezierInfo-2#77] by [Behdad] so it was easy enough to test.
 
-<img src="/assets/3rd_order_quadrature_error_plot.png" width="570" height="520">
+<img src="https://raphlinus.github.io/assets/3rd_order_quadrature_error_plot.png" width="570" height="520">
 
 It's quite a bit better; the region where it's very accurate is bigger. Interestingly enough, though, it doesn't do a lot better for extreme cases. Intuitively, it should be possible to get accurate results with fewer subdivisions. The problem is: how do you compute a bound on the error? The advantage of the Gravesen approach is that it has the error metric built-in.
 
 Or does it? Let's verify that. I implemented the adaptive subdivision from the Gravesen paper and then made this plot, with the accuracy threshold set to 1e-4:
 
-<img src="/assets/gravesen_subdivided_error_plot.png" width="570" height="520">
+<img src="https://raphlinus.github.io/assets/gravesen_subdivided_error_plot.png" width="570" height="520">
 
 If it's working as intended, then no part of the map should go beyond red, the color for 1e-4. But we can see that for some stripes (generally the regions where the approximation is crossing from overshoot to undershoot), the error is underestimated as well, and there are bits of orange where that happens. It's a fairly small fraction of the area of the map, and these get even thinner as the threshold is set lower. But even so, as a way to guarantee measurements of a given accuracy, it's a failure. We need a better approach.
 
@@ -215,7 +207,7 @@ Incidentally, this map also lets us visualize the subdivisions; they're sharp li
 
 How does Pomax's [Bezier.js] solve this problem? Looking at the code, it uses 24-order Legendre-Gauss quadrature. This seems like it should be massive overkill and is not that expensive to compute (it's basically 24 "hypot" operations plus some linear math). Can we just do that? Let's take a look.
 
-<img src="/assets/24th_order_quadrature_error_plot.png" width="570" height="520">
+<img src="https://raphlinus.github.io/assets/24th_order_quadrature_error_plot.png" width="570" height="520">
 
 Looking at this, reasonably smooth quadratic Béziers get measured very precisely, but more extreme ones do not. In fact, for the ones that have sharp kinks, it only does a little better than the simpler techniques. So it's overkill for part of the range, and undershoot for other parts. These pathological Béziers can and do happen, especially during interactive editing. For completely general use, the technique in Bezier.js doesn't solve our problem.
 
@@ -233,11 +225,11 @@ Here the `lp` and `lc` variables represent the length of the perimeter and chord
 
 One good way to validate such a function is scatter plots; for each point we plot the estimated error on the x axis, and the actual error on the y axis. No point is allowed to be above the x=y line, and ideally every point is pretty close to it. Let's see how we did:
 
-<img src="/assets/quadrature_error_est.png" width="603" height="571">
+<img src="https://raphlinus.github.io/assets/quadrature_error_est.png" width="603" height="571">
 
 That's a good error metric. And let's see how it performs:
 
-<img src="/assets/quadrature_subdivided.png" width="570" height="520">
+<img src="https://raphlinus.github.io/assets/quadrature_subdivided.png" width="570" height="520">
 
 Note that the colors are rescaled; it only goes up to 1e-4 so we can see more clearly (and because it's prettier that way). And we see that the metric is doing well; precision much better than the threshold is a sign we're wasting computation. We also see that it's subdividing less than the Gravesen metric, which means computation is faster.
 
@@ -257,11 +249,11 @@ Easy! In this formula, $a$, $b$, and $c$ represent squared norms of the second a
 
 I had several concerns about this approach. One is numerical stability; the formula has several divide operations, which mostly are mostly over powers of the second derivative norm. Given that, it's likely that accuracy will degrade as the curve gets closer to a straight line. And inded, for an exact straight line this code gives `NaN`. Zooming in, we can see the problem:
 
-<img src="/assets/analytical_error.png" width="570" height="520">
+<img src="https://raphlinus.github.io/assets/analytical_error.png" width="570" height="520">
 
 Note that the colors are rescaled again; the worst error on this map (other than the `NaN` at the origin which is not plotted) is 1e-11. That's not bad, but let's do the best we can while fixing the singularity at the origin. Fortunately, already have a function which is good in that range, the quadrature approach. The actual code in kurbo compares the second derivative norm against a threshold, and switches to quadrature inside that:
 
-<img src="/assets/analytical_repaired.png" width="570" height="520">
+<img src="https://raphlinus.github.io/assets/analytical_repaired.png" width="570" height="520">
 
 There's another numerical instability for curves with a sharp kink (surprise, surprise); internal to the math this happens when $b^2 - 4ac$ becomes zero. It's fixed in a similar way. Also, in addition to the visualizations in this blog post, kurbo has tests for these cases. I believe this algorithm has over 13 digits of precision over the entire map.
 
@@ -283,7 +275,7 @@ Again, the tricky part is the error metric. The error metric for a quadratic Bé
 
 Unlike quadratics, it's hard to visualize the space of all possible cubics; it's a four-parameter space, and my ability to visualize fields in four dimensions is limited. Thus, instead of 2d maps I mostly used randomly generated cubics, and scatterplots of whatever I wanted to measure from those. Cubics are also trickier, it's not going to be easy to get error bounds as tight.
 
-After some experimentation, mostly iterating on those scatter plots and trying things that either improved the tightness of the error bound or made it worse, I found that working with the *integral* of the second derivative norm was both tractable and gave a decent error bound.
+After some experimentation, mostly iterating on those scatter plots and trying things that either improved the tightness of the error bound or made it worse, I found that working with the _integral_ of the second derivative norm was both tractable and gave a decent error bound.
 
 Let's write the second derivative as a simple linear equation:
 
@@ -306,7 +298,7 @@ All this work is based on heuristics. Going to higher order quadrature helps up 
 
 There are a few ways to evaluate performance. One is a scatterplot of the number of subdivisions required and the actual accuracy. Below is a sampling of random cubic Béziers with an error tolerance of 1e-4:
 
-<img src="/assets/cubic_arclen_performance.png" width="630" height="478">
+<img src="https://raphlinus.github.io/assets/cubic_arclen_performance.png" width="630" height="478">
 
 The vertical axis has the number of subdivisions, and the horizontal axis the actual error. Obviously we don't want any points to the right of the specified tolerance. The majority of cases are handled with 4 or fewer subdivisions (in fact the mean is about 3.4 over my sample). It would be nicer to have them bunched closer to the right, but that would require a better error bound. Perhaps some enterprising reader will take up this work :).
 
@@ -329,7 +321,7 @@ I enjoyed this journey; it was a chance to dive deep into territory I find fun. 
 
 I also found Rust to be an excellent implementation language for this work. I enjoyed writing code using higher level concepts and being able to rely on the compiler to flatten out all the abstraction and generate excellent code (in a few cases I looked at the asm, it's pretty sweet).
 
-One lesson is to *always* empirically measure what you're doing. Guaranteed you will learn something, otherwise you're flying blind. Visualizations are especially good because you can see lots of data points. Similarly for randomly generated data. Otherwise there's a good chance you'll miss something.
+One lesson is to _always_ empirically measure what you're doing. Guaranteed you will learn something, otherwise you're flying blind. Visualizations are especially good because you can see lots of data points. Similarly for randomly generated data. Otherwise there's a good chance you'll miss something.
 
 This is especially true when working from academic papers. Having lots of theorems is not a reliable sign the algorithms translate directly to robust code.
 
@@ -360,22 +352,22 @@ And thanks to you for reading!
 Discuss on [lobste.rs](https://lobste.rs/s/ysgy3e/how_long_is_bezier) and [Hacker News](https://news.ycombinator.com/item?id=18786583).
 
 [kurbo]: http://github.com/linebender/kurbo
-[A Primer on Bézier Curves]: https://pomax.github.io/bezierinfo/
+[a primer on bézier curves]: https://pomax.github.io/bezierinfo/
 [arclength]: https://pomax.github.io/bezierinfo/#arclength
-[Gravesen]: https://www.sciencedirect.com/science/article/pii/0925772195000542
-[de Casteljau]: https://en.wikipedia.org/wiki/De_Casteljau%27s_algorithm
-[Euler explorer]: https://raphlinus.github.io/curves/2018/12/08/euler-spiral.html
-[PhD thesis]: https://levien.com/phd/thesis.pdf
-[Pomax/BezierInfo-2#77]: https://github.com/Pomax/BezierInfo-2/issues/77
-[Behdad]: http://behdad.org/
+[gravesen]: https://www.sciencedirect.com/science/article/pii/0925772195000542
+[de casteljau]: https://en.wikipedia.org/wiki/De_Casteljau%27s_algorithm
+[euler explorer]: https://raphlinus.github.io/curves/2018/12/08/euler-spiral.html
+[phd thesis]: https://levien.com/phd/thesis.pdf
+[pomax/bezierinfo-2#77]: https://github.com/Pomax/BezierInfo-2/issues/77
+[behdad]: http://behdad.org/
 [arclen_accuracy]: https://github.com/linebender/kurbo/blob/master/examples/arclen_accuracy.rs
-[Bezier.js]: https://pomax.github.io/bezierjs/
-[Mateusz Malczak]: https://web.archive.org/web/20180418075534/http://www.malczak.linuxpl.com/blog/quadratic-bezier-curve-length/
-[Abel–Ruffini theorem]: https://en.wikipedia.org/wiki/Abel%E2%80%93Ruffini_theorem
+[bezier.js]: https://pomax.github.io/bezierjs/
+[mateusz malczak]: https://web.archive.org/web/20180418075534/http://www.malczak.linuxpl.com/blog/quadratic-bezier-curve-length/
+[abel–ruffini theorem]: https://en.wikipedia.org/wiki/Abel%E2%80%93Ruffini_theorem
 [nearest point]: https://docs.rs/kurbo/0.1.0/kurbo/trait.ParamCurveNearest.html#tymethod.nearest
-[TYPO Labs 2017 presentation]: https://www.youtube.com/watch?v=4_Dy3-_MyiA&feature=youtu.be&t=24m5s
-[arclength in fontTools]: https://github.com/fonttools/fonttools/blob/master/Lib/fontTools/misc/bezierTools.py#L98
-[Bézier Segment Arclength]: https://beta.observablehq.com/@jrus/bezier-segment-arclength
+[typo labs 2017 presentation]: https://www.youtube.com/watch?v=4_Dy3-_MyiA&feature=youtu.be&t=24m5s
+[arclength in fonttools]: https://github.com/fonttools/fonttools/blob/master/Lib/fontTools/misc/bezierTools.py#L98
+[bézier segment arclength]: https://beta.observablehq.com/@jrus/bezier-segment-arclength
 [kurbo-area]: https://docs.rs/kurbo/0.1.0/kurbo/trait.ParamCurveArea.html
-[SymPy]: https://www.sympy.org/en/index.html
-[Stone and DeRose geometric characterization]: https://pomax.github.io/bezierinfo/#canonical
+[sympy]: https://www.sympy.org/en/index.html
+[stone and derose geometric characterization]: https://pomax.github.io/bezierinfo/#canonical

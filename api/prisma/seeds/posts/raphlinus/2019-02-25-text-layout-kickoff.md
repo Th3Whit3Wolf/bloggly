@@ -1,9 +1,10 @@
 ---
 layout: post
-title:  "Low level text layout kickoff"
-date:   2019-02-27 11:16:42 -0700
+title: "Low level text layout kickoff"
+date: 2019-02-27 11:16:42 -0700
 categories: [rust, skribo, text]
 ---
+
 This post is to announce a new Rust library for low-level text layout, called "[skribo]" (the Esperanto word for "writing"). This has been a major gap in the Rust ecosystem, and I hope the new crate can improve text handling across the board.
 
 ## Multiple shaping engines
@@ -14,11 +15,11 @@ The choice of whether to use HarfBuzz or platform shaping is a tradeoff. Using H
 
 Shaping is essential to complex scripts such as Devanagari and Arabic, but important even in Latin to improve quality through ligatures and kerning. On the left is text without shaping (rendered with Cairo's "toy text API"), on the right properly shaped text (rendered with DirectWrite):
 
-<img src="/assets/shaping_comparison.png" width="480" height="120" alt="CJK shaping example" style="margin-left: auto; margin-right: auto; display: block">
+<img src="https://raphlinus.github.io/assets/shaping_comparison.png" width="480" height="120" alt="CJK shaping example" style="margin-left: auto; margin-right: auto; display: block">
 
 ## Expected users
 
-This work is funded by Mozilla Research to be used in Servo. Doing text layout for the Web is a very complex problem. The higher level representation of rich text is very tightly bound to the DOM and CSS. All that logic needs to live in Servo, with the lower level providing a clean interface to lay out a span of text with a *single* style and a single [BiDi] direction.
+This work is funded by Mozilla Research to be used in Servo. Doing text layout for the Web is a very complex problem. The higher level representation of rich text is very tightly bound to the DOM and CSS. All that logic needs to live in Servo, with the lower level providing a clean interface to lay out a span of text with a _single_ style and a single [BiDi] direction.
 
 The second major use case is [piet], the 2D graphics abstraction I've been working on. Currently for the Cairo back-end piet uses the "toy text API," which is of course [inadequate][piet#10]. The idea is that skribo handles text layout for Cairo and all future low-level drawing back-ends (including any future back-end using WebRender or direct Vulkan drawing). A requirement for both Web layout and text editing within GUI apps (including potential front-end work for [xi-editor]) is fine-grained measurement of text, including positioning of carets within text as well as width measurement of spans of text.
 
@@ -32,7 +33,7 @@ Another major problem is making sure locale information affects layout properly.
 
 Here's a visual example of the effect of locale on the rendering of CJK text. In all cases, the ideographs are the same sequence of Unicode code points:
 
-<img src="/assets/shaping_cjk_locale.png" width="341" height="171" alt="CJK shaping example" style="margin-left: auto; margin-right: auto; display: block">
+<img src="https://raphlinus.github.io/assets/shaping_cjk_locale.png" width="341" height="171" alt="CJK shaping example" style="margin-left: auto; margin-right: auto; display: block">
 
 Other problems within scope are figuring out logic for "fake bold" and "fake italic" when the font collection doesn't provide true versions, as well as adding [letter-spacing].
 
@@ -48,15 +49,15 @@ Similarly, the design of skribo will include a word cache. This should be transp
 
 A number of problems are best handled at a higher level and are out of scope for this library:
 
-* Paragraph level formatting including line breaking.
+-   Paragraph level formatting including line breaking.
 
-* Hyphenation.
+-   Hyphenation.
 
-* Representation of rich text.
+-   Representation of rich text.
 
-* BiDi.
+-   BiDi.
 
-Many of these problems *are* solved by comparable platform text libraries such as DirectWrite and CoreText. I can imagine a higher level text layout crate that solves some of these problems, but for the time being this would need to be a community effort, I am not driving it as part of the skribo effort.
+Many of these problems _are_ solved by comparable platform text libraries such as DirectWrite and CoreText. I can imagine a higher level text layout crate that solves some of these problems, but for the time being this would need to be a community effort, I am not driving it as part of the skribo effort.
 
 ## Inspirations
 
@@ -72,20 +73,20 @@ This project is explicitly intended to teach and engage the community, rather th
 
 [piet]: https://github.com/linebender/piet
 [project roadmap]: https://drive.google.com/open?id=1aw41q_izail-p99mN8dHrJeh9tMQ-Pldi54W6m7MHU8
-[HarfBuzz]: https://www.freedesktop.org/wiki/Software/HarfBuzz/
-[Pango]: https://www.pango.org/
-[DirectWrite]: https://docs.microsoft.com/en-us/windows/desktop/directwrite/direct-write-portal
-[CoreText]: https://developer.apple.com/documentation/coretext
-[Minikin]: https://android.googlesource.com/platform/frameworks/minikin/
+[harfbuzz]: https://www.freedesktop.org/wiki/Software/HarfBuzz/
+[pango]: https://www.pango.org/
+[directwrite]: https://docs.microsoft.com/en-us/windows/desktop/directwrite/direct-write-portal
+[coretext]: https://developer.apple.com/documentation/coretext
+[minikin]: https://android.googlesource.com/platform/frameworks/minikin/
 [libtxt]: https://github.com/flutter/flutter/issues/11092
-[BiDi]: https://en.wikipedia.org/wiki/Bi-directional_text
+[bidi]: https://en.wikipedia.org/wiki/Bi-directional_text
 [piet#10]: https://github.com/linebender/piet/issues/10
 [rusttype]: https://github.com/redox-os/rusttype
-[Source Han Sans]: https://blogs.adobe.com/CCJKType/2018/11/shsans-v2-technical-tidbits.html
+[source han sans]: https://blogs.adobe.com/CCJKType/2018/11/shsans-v2-technical-tidbits.html
 [letter-spacing]: https://developer.mozilla.org/en-US/docs/Web/CSS/letter-spacing
 [font variations]: https://docs.microsoft.com/en-us/typography/opentype/spec/otvaroverview
-[Unicode presentation on Chrome text]: http://www.unicodeconference.org/presentations/S5T2-R%C3%B6ttsches-Esfahbod.pdf
+[unicode presentation on chrome text]: http://www.unicodeconference.org/presentations/S5T2-R%C3%B6ttsches-Esfahbod.pdf
 [skribo]: https://github.com/linebender/skribo
 [eliminating simple text]: https://www.chromium.org/teams/layout-team/eliminating-simple-text
-[Han unification]: https://en.wikipedia.org/wiki/Han_unification
+[han unification]: https://en.wikipedia.org/wiki/Han_unification
 [xi-editor]: https://xi-editor.io/

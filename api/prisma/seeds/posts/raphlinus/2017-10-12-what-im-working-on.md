@@ -1,9 +1,10 @@
 ---
 layout: post
-title:  "What I’m working on at Recurse Center"
-date:   2017-10-12 11:59:03 -0400
+title: "What I’m working on at Recurse Center"
+date: 2017-10-12 11:59:03 -0400
 categories: personal
 ---
+
 I’m almost 3/4 of the way through my batch at [Recurse Center](https://recurse.com/).
 I’ve been working on a bunch of things, and thought it might be useful to go over
 them in some detail.
@@ -14,7 +15,7 @@ I came here with the goal of re-launching [Ghilbert](http://ghilbert.org). This 
 a very ambitious project, basically a new language for representing formal proofs.
 I got quite a bit done on it, but my motivation has not been consistently strong.
 
-![Ghilbert screenshot]({{ site.url }}/assets/ghilbert_screenshot.png)
+![Ghilbert screenshot](https://raphlinus.github.io/assets/ghilbert_screenshot.png)
 
 One of the challenges (which I’m realizing is a bad sign), is that I haven’t been
 able to articulate the goals of the project very well, especially who it’s for.
@@ -69,7 +70,7 @@ it would be hard for an attacker to create a visual collision). I dusted that
 off, reimplemented in Javascript with SVG rendering, and posted it as as a
 [small interactive webpage](http://levien.com/snowflake.html).
 
-[![Rainbow snowflake]({{ site.url }}/assets/snowflake.png)](http://levien.com/snowflake.html)
+[![Rainbow snowflake](https://raphlinus.github.io/assets/snowflake.png)](http://levien.com/snowflake.html)
 
 I also made some progress in doing a more detailed
 [explanation](http://levien.com/snowflake-explain.html), intending it to
@@ -91,7 +92,7 @@ in 6502 assembler.
 Guided by the thought of maybe putting an emulator on my webpage, I wrote some
 fairly simple code to render a proportionally spaced bitmap font. It worked:
 
-![Apple 2 text screenshot]({{ site.url }}/assets/apple2_text.jpg)
+![Apple 2 text screenshot](https://raphlinus.github.io/assets/apple2_text.jpg)
 
 The code is not yet published.
 

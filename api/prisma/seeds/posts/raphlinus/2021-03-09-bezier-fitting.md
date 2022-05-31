@@ -5,16 +5,6 @@ date: 2021-03-11 13:14:42 -0700
 categories: [curves]
 ---
 
-<!-- I should figure out a cleaner way to do this include, rather than cutting and pasting. Ah well.-->
-<script type="text/x-mathjax-config">
-	MathJax.Hub.Config({
-		tex2jax: {
-			inlineMath: [['$', '$']]
-		}
-	});
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
-
 Cubic Béziers are by far the most common curve representation, used both for design and rendering. One of the fundamental problems when working with curves is _curve fitting,_ or determining the Bézier that's closest to some source curve. Applications include simplifying existing paths, efficiently representing the [parallel curve], and rendering other spline representations such as Euler spiral or [hyperbezier]. A specific feature where curve fitting will be used in [Runebender] is deleting a smooth on-curve point. The intent is to merge two Béziers into one, which is another way of saying to find a Bézier which best approximates the curve formed from the two existing Bézier segments.
 
 In spite of the importance of the curve-fitting problem and a literature going back more than thirty years, there has to date been no fully satisfactory solution. Existing approaches either fail to consistently produce the best result, are slow (unsuitable for interactive use), or both.

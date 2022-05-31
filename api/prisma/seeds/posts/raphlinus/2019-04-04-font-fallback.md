@@ -1,9 +1,10 @@
 ---
 layout: post
-title:  "Font fallback deep dive"
-date:   2019-04-04 12:03:42 -0700
+title: "Font fallback deep dive"
+date: 2019-04-04 12:03:42 -0700
 categories: [rust, skribo, text]
 ---
+
 One of the main functions of [skribo] is "font fallback," or choosing fonts to render an arbitrary string of text. This post is a deep dive into the topic, motivating the problem and explaining the approaches to solve it.
 
 When buying fully into the platform's text stack, font fallback is usually handled transparently. But when doing the layout ourselves, as is done in skribo (and as is generally necessary in Web browsers), we have to query deeply into the system to find the fonts.
@@ -16,17 +17,17 @@ There are two crates involved in this work: font-kit wraps the system functions 
 
 No one font can cover all of Unicode, so text stacks rely on a patchwork, each of which covers some subset of scripts. A typical modern system has around 30 to 80 such fonts. Depending on the scripts used, a string might then require a bunch of different fonts to render. The problem of font fallback is to choose the fonts needed. That breaks down into the following main subproblems:
 
-* Determine (from the sytem) which fonts are available.
+-   Determine (from the sytem) which fonts are available.
 
-* Determine, based on the string and the Unicode coverage of those fonts, which fonts to use.
+-   Determine, based on the string and the Unicode coverage of those fonts, which fonts to use.
 
-* When multiple fonts have Unicode coverage, choose the best.
+-   When multiple fonts have Unicode coverage, choose the best.
 
 That last bit is especially complex, as we'll see. The major complications are:
 
-* Resolve [Han unification], or more generally, prioritize based on locale.
+-   Resolve [Han unification], or more generally, prioritize based on locale.
 
-* Try to find a font that matches the style of the primary font.
+-   Try to find a font that matches the style of the primary font.
 
 ## Han unification
 
@@ -34,7 +35,7 @@ One thing that makes font choice particularly tricky is [Han unification]. Han u
 
 In the following example, the text is the same sequence of Unicode code points. Only the locale is set differently, and this has significant effect on the rendering.
 
-<img src="/assets/shaping_cjk_locale.png" width="341" height="171" alt="CJK shaping example" style="margin-left: auto; margin-right: auto; display: block">
+<img src="https://raphlinus.github.io/assets/shaping_cjk_locale.png" width="341" height="171" alt="CJK shaping example" style="margin-left: auto; margin-right: auto; display: block">
 
 An immediate consequence is that code point is not adequate for choosing a font, the locale must be an input as well. In HTML, locale can be set explicitly through the "lang" attribute. Failing that, a number of heuristics determine it, and in the last resort the system locale settings.
 
@@ -50,7 +51,7 @@ The methods for finding fallback fonts vary by system, and within a system vary 
 
 ### Windows
 
-For Windows 8.1 and later, there is a pretty good API for finding the fallback fonts: the [IDWriteFontFallback] interface. This is a query *by string,* so it will need to be queried often, and it is difficult to cache the results. A good feature is that it doesn't bother with unused fonts.
+For Windows 8.1 and later, there is a pretty good API for finding the fallback fonts: the [IDWriteFontFallback] interface. This is a query _by string,_ so it will need to be queried often, and it is difficult to cache the results. A good feature is that it doesn't bother with unused fonts.
 
 On older versions of Windows, there are a number of approaches, probably the best is to do layout for the string using the platform renderer, and then use a custom "renderer" that doesn't actually render, but instead collects references to the fonts. Firefox does a version of this. Chrome does something similar but uses the older Uniscribe as well (this is compatible all the way back to XP).
 
@@ -95,14 +96,14 @@ In investigating the issue, I've read lots of open source code, especially Qt, B
 Thanks again to the Servo people for supporting this work.
 
 [skribo]: https://github.com/linebender/skribo
-[Han unification]: https://en.wikipedia.org/wiki/Han_unification
+[han unification]: https://en.wikipedia.org/wiki/Han_unification
 [script matching]: script_matching.md
 [font-kit#37]: https://github.com/pcwalton/font-kit/issues/37
 [font-kit#40]: https://github.com/pcwalton/font-kit/issues/40
-[CTFontCopyDefaultCascadeListForLanguages]: https://developer.apple.com/documentation/coretext/1509992-ctfontcopydefaultcascadelistforl
+[ctfontcopydefaultcascadelistforlanguages]: https://developer.apple.com/documentation/coretext/1509992-ctfontcopydefaultcascadelistforl
 [fonts.xml]: https://android.googlesource.com/platform/frameworks/base/+/master/data/fonts/fonts.xml
-[SystemFonts]: https://developer.android.com/reference/android/graphics/fonts/SystemFonts
-[MapCharacters]: https://docs.microsoft.com/en-us/windows/desktop/api/dwrite_2/nf-dwrite_2-idwritefontfallback-mapcharacters
-[Noto fonts]: https://www.google.com/get/noto/
-[Fontconfig]: https://www.freedesktop.org/wiki/Software/fontconfig/
-[IDWriteFontFallback]: https://docs.microsoft.com/en-us/windows/desktop/api/dwrite_2/nn-dwrite_2-idwritefontfallback
+[systemfonts]: https://developer.android.com/reference/android/graphics/fonts/SystemFonts
+[mapcharacters]: https://docs.microsoft.com/en-us/windows/desktop/api/dwrite_2/nf-dwrite_2-idwritefontfallback-mapcharacters
+[noto fonts]: https://www.google.com/get/noto/
+[fontconfig]: https://www.freedesktop.org/wiki/Software/fontconfig/
+[idwritefontfallback]: https://docs.microsoft.com/en-us/windows/desktop/api/dwrite_2/nn-dwrite_2-idwritefontfallback

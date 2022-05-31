@@ -5,15 +5,6 @@ date: 2020-04-21 11:24:42 -0800
 categories: [graphics]
 ---
 
-<script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-        tex2jax: {
-            inlineMath: [['$', '$']]
-        }
-    });
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
-
 Note: I'm publishing this with inadequate visuals, as it's been stuck in my queue for 3 weeks and I want to get it out there. I'd like to return to making proper images, but make no promises when.
 
 For now, a quick comparison of exact (computed with numerical integration) results (on the left) with my approximation:

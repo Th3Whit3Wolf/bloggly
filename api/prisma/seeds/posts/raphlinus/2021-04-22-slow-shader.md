@@ -17,11 +17,11 @@ The early results on desktop GPU where encouraging. On high-end discrete cards, 
 
 The test is rendering a Ghostscript tiger at a resolution of 1088x2288 pixels. There are 7 pipeline stages, most of which are very quick to run, so the bulk is in the final stage, fine rasterization. On Intel HD Graphics 630, the first six pipelines take a total of 0.86 ms, and the fine rasterization 2.04ms at the best setting of CHUNK (about which more later; in any case performance is not very sensitive to this tuning parameter).
 
-<img src="/assets/gpu_intel_630_timings.png" width="608" alt="Timings of Intel 630" />
+<img src="https://raphlinus.github.io/assets/gpu_intel_630_timings.png" width="608" alt="Timings of Intel 630" />
 
 Running the same workload on a Pixel 4 gave much worse results. The first six stages take a total of 2.45ms, but the fine rasterization stage is 11.7ms, which is _much_ slower than the Intel reference. Further, it's very dependent on this CHUNK parameter, which if nothing else is evidence that the performance characteristics are very different.
 
-<img src="/assets/gpu_adreno_640_timings.png" width="608" alt="Timings of Adreno 640" />
+<img src="[assets](https://raphlinus.github.io/assets/)/gpu_adreno_640_timings.png" width="608" alt="Timings of Adreno 640" />
 
 These numbers are disappointing. It's barely capable of 60fps on the tiger, but that's a simpler workload, and the display on this hardware actually has a refresh rate of 90fps.
 
@@ -57,7 +57,7 @@ After a fair amount of time exploring dead ends, I found that commenting out the
 
 The performance was much closer to what I was hoping - only about 2x slower than the Intel reference, in line with my expectations for the hardware capability and clock speed. In particular, fine rasterization was 4.22ms at the best CHUNK value, and, like the Intel reference, not hugely sensitive to the setting.
 
-<img src="/assets/gpu_adreno_640_noclip_timings.png" width="608" alt="Timings of Adreno 640 with clip disabled" />
+<img src="https://raphlinus.github.io/assets/gpu_adreno_640_noclip_timings.png" width="608" alt="Timings of Adreno 640 with clip disabled" />
 
 Continuing to bisect, it was specifically the lines in BeginClip that were writing to memory. Further, in what I started to call the "happy path," overall performance was only weakly affected by `CHUNK`, pointing strongly to the hypothesis that whatever was happening was making memory reads slow, and in particular caching not effective.
 
