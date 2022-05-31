@@ -142,17 +142,24 @@ class PrismaController {
 		limit = Number(limit || this.queryLimit);
 		page = Number(page || 1);
 
+		/*
+		 * Note: This is a temporary fix for ordering by creation date for posts.
+		 * This will fail once users start being queried.
+		 * To fix, orderBy should be an option passed in during instantiation.
+		 */
 		const data =
 			limit > 0
 				? await this.dbResource.findMany({
 						where: query,
 						take: limit,
+						orderBy: [{ createdAt: "desc" }],
 						skip: (page - 1) * limit,
 						...this.queryOpt.read,
 						...this.queryOpt.list
 				  })
 				: await this.dbResource.findMany({
 						where: query,
+						orderBy: [{ createdAt: "desc" }],
 						...this.queryOpt.read,
 						...this.queryOpt.list
 				  });
