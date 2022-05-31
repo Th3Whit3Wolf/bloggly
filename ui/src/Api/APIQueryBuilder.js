@@ -1,6 +1,6 @@
 const baseURL =
 	process.env.NODE_ENV == "production"
-		? "https://https://bloggly-api.herokuapp.com/api/v1"
+		? "https://bloggly-api.herokuapp.com/api/v1"
 		: "http://localhost:8081/api/v1";
 
 const queryBuilderThrow = (fnName, errorKind, expected, received) => {
