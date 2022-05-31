@@ -16,8 +16,8 @@ const app = express();
 const log = expressPino({
 	logger
 });
-
-app.use(helmet({ crossOriginResourcePolicy: { policy: "same-site" } }));
+app.disable("x-powered-by");
+// app.use(helmet({ crossOriginResourcePolicy: { policy: "same-site" } }));
 app.use(cookieParser());
 app.use(
 	actuator({
@@ -40,12 +40,12 @@ app.use(log);
 
 if (NODE_ENV === "production") {
 	app.use(
-		cors({
+		cors(/* {
 			origin: "https://bloggly-ui.herokuapp.com/",
 			allowedHeaders:
 				"Origin, X-Requested-With, Content-Type, Accept, Authorization",
 			methods: ["GET", "PUT", "POST", "DELETE"]
-		})
+		} */)
 	);
 } else {
 	app.use((req, res, next) => {
