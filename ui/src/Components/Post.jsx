@@ -35,6 +35,7 @@ import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { languages } from "@codemirror/language-data";
 import { materialLight } from "@ddietr/codemirror-themes/theme/material-light";
 import { materialDark } from "@ddietr/codemirror-themes/theme/material-dark";
+import "katex/dist/katex.min.css";
 import { useLocation, useNavigate, NavLink } from "react-router-dom";
 
 import { PostAPI } from "#Api";

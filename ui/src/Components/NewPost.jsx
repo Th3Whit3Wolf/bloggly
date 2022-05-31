@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useContext, useState } from "react";
 import {
-	Avatar,
 	Box,
 	Button,
 	Grid,
@@ -14,7 +13,6 @@ import {
 } from "@mui/material";
 
 import {
-	Message as MessageIcon,
 	Title as TitleIcon,
 	PostAdd as PostAddIcon
 } from "@mui/icons-material";
@@ -28,7 +26,7 @@ import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { languages } from "@codemirror/language-data";
 import { materialLight } from "@ddietr/codemirror-themes/theme/material-light";
 import { materialDark } from "@ddietr/codemirror-themes/theme/material-dark";
-
+import "katex/dist/katex.min.css";
 import { PostAPI } from "#Api";
 import { UserContext } from "#Context";
 import { MainContainer, Notification } from "#Components";

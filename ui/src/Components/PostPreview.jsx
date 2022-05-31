@@ -5,6 +5,7 @@ import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRigh
 import MarkdownPreview from "@uiw/react-markdown-preview";
 import RehypeKatexPlugin from "rehype-katex";
 import RemarkMathPlugin from "remark-math";
+import "katex/dist/katex.min.css";
 import truncateMarkdown from "markdown-truncate";
 
 import { UserContext } from "#Context";
@@ -19,7 +20,7 @@ const PostPreview = ({
 	content,
 	user,
 	createdAt,
-	updatedAt,
+	/*updatedAt,*/
 	spotlight
 }) => {
 	const theme = useTheme();

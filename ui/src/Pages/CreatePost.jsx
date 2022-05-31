@@ -1,9 +1,8 @@
 import { useEffect } from "react";
-import { Container, useTheme } from "@mui/material";
+import { Container } from "@mui/material";
 import { NewPost } from "#Components";
 
 const CreatePost = () => {
-	const theme = useTheme();
 	useEffect(() => {
 		document.title = "New Post";
 	}, []);
