@@ -16,7 +16,6 @@ import {
 import { NavLink } from "react-router-dom";
 
 import HeroIMG from "../Assets/Imgs/hero.jpg";
-import { MainContainer } from "#Components";
 
 const LinkBehavior = forwardRef((props, ref) => (
 	<NavLink ref={ref} to="/" {...props} role={undefined} />
