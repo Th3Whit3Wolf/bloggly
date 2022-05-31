@@ -57,6 +57,9 @@ const a11yProps = index => {
 	};
 };
 
+/*
+ * Tab panel for editing and previewing post content
+ */
 const TabPanel = props => {
 	const { children, value, index, ...other } = props;
 
