@@ -72,7 +72,8 @@ const Notification = ({
 				: "top"
 	});
 
-	const handleClose = event => {
+	const handleClose = e => {
+		e.preventDefault();
 		setNotificationState({ ...notificationState, open: false });
 		if (afterClose) {
 			setTimeout(() => {
