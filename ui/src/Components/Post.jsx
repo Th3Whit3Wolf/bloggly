@@ -28,12 +28,13 @@ import {
 import { styled } from "@mui/material/styles";
 
 import MarkdownPreview from "@uiw/react-markdown-preview";
+import RehypeKatexPlugin from "rehype-katex";
+import RemarkMathPlugin from "remark-math";
 import CodeMirror from "@uiw/react-codemirror";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { languages } from "@codemirror/language-data";
 import { materialLight } from "@ddietr/codemirror-themes/theme/material-light";
 import { materialDark } from "@ddietr/codemirror-themes/theme/material-dark";
-
 import { useLocation, useNavigate, NavLink } from "react-router-dom";
 
 import { PostAPI } from "#Api";
@@ -502,6 +503,8 @@ const Post = ({ id: postID, title, content, createdAt }) => {
 									color: theme.palette.text.primary,
 									backgroundColor: theme.palette.background.default
 								}}
+								remarkPlugins={[RemarkMathPlugin]}
+								rehypePlugins={[RehypeKatexPlugin]}
 							/>
 						</TabPanel>
 					</>
@@ -512,6 +515,8 @@ const Post = ({ id: postID, title, content, createdAt }) => {
 							color: theme.palette.text.primary,
 							backgroundColor: theme.palette.background.default
 						}}
+						remarkPlugins={[RemarkMathPlugin]}
+						rehypePlugins={[RehypeKatexPlugin]}
 					/>
 				)}
 			</Box>

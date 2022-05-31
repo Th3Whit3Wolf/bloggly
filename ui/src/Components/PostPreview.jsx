@@ -3,6 +3,8 @@ import { NavLink } from "react-router-dom";
 import { Typography, useTheme, Button, Box, Avatar } from "@mui/material";
 import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
 import MarkdownPreview from "@uiw/react-markdown-preview";
+import RehypeKatexPlugin from "rehype-katex";
+import RemarkMathPlugin from "remark-math";
 import truncateMarkdown from "markdown-truncate";
 
 import { UserContext } from "#Context";
@@ -59,6 +61,8 @@ const PostPreview = ({
 								: "#263747"
 							: theme.palette.background.default
 					}}
+					remarkPlugins={[RemarkMathPlugin]}
+					rehypePlugins={[RehypeKatexPlugin]}
 				/>
 			</Typography>
 			<Avatar

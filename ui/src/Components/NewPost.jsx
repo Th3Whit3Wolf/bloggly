@@ -20,6 +20,9 @@ import {
 } from "@mui/icons-material";
 
 import MarkdownPreview from "@uiw/react-markdown-preview";
+import RehypeKatexPlugin from "rehype-katex";
+import RemarkMathPlugin from "remark-math";
+
 import CodeMirror from "@uiw/react-codemirror";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { languages } from "@codemirror/language-data";
@@ -263,6 +266,8 @@ const NewPost = () => {
 										color: theme.palette.text.primary,
 										backgroundColor: theme.palette.background.default
 									}}
+									remarkPlugins={[RemarkMathPlugin]}
+									rehypePlugins={[RehypeKatexPlugin]}
 								/>
 							</TabPanel>
 						</Grid>
