@@ -82,11 +82,12 @@ const SignUpForm = () => {
 		).then(res => {
 			if (res.ok) {
 				res.json().then(data => {
+					console.log({ data });
 					setUser({
 						...user,
 						isLoggedIn: true,
 						posts: [],
-						info: { ...data }
+						info: { ...data.data }
 					});
 				});
 			} else {

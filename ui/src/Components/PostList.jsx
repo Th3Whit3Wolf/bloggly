@@ -127,30 +127,32 @@ const PostList = ({ posts }) => {
 							</Box>
 						))}
 					</Box>
-					<Pagination
-						page={page + 1}
-						count={totalPage}
-						shape="rounded"
-						showFirstButton
-						showLastButton
-						onChange={(_, value) => {
-							setPage(value - 1);
-						}}
-						sx={{
-							mt: 1,
-							mb: 8,
-							"& .MuiPaginationItem-root": {
-								color: "#fff"
-							},
-							"& .MuiPaginationItem-text": {
-								color: theme.palette.primary.main
-							},
-							"& .Mui-selected": {
-								backgroundColor: theme.palette.gsb.primary,
-								color: "#FFFFFF"
-							}
-						}}
-					/>
+					{totalPage > 1 && (
+						<Pagination
+							page={page + 1}
+							count={totalPage}
+							shape="rounded"
+							showFirstButton
+							showLastButton
+							onChange={(_, value) => {
+								setPage(value - 1);
+							}}
+							sx={{
+								mt: 1,
+								mb: 8,
+								"& .MuiPaginationItem-root": {
+									color: "#fff"
+								},
+								"& .MuiPaginationItem-text": {
+									color: theme.palette.primary.main
+								},
+								"& .Mui-selected": {
+									backgroundColor: theme.palette.gsb.primary,
+									color: "#FFFFFF"
+								}
+							}}
+						/>
+					)}
 				</Box>
 			</Container>
 		</Container>

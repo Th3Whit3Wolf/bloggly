@@ -28,7 +28,7 @@ const UserPosts = () => {
 
 	return (
 		<Container>
-			{posts.length > 0 ? <PostList posts={posts} /> : <div>Loading...</div>}
+			<PostList posts={posts} />
 		</Container>
 	);
 };
