@@ -329,10 +329,10 @@ const Post = ({ id: postID, title, content, createdAt }) => {
 				<Item>
 					<Button
 						variant="outlined"
-						aria-label="sign up"
-						data-testid="signupButton"
+						aria-label="back to posts"
+						data-testid="backButton"
 						component={LinkBehavior}
-						to="/signup"
+						to={isUserPost ? "/user/posts" : "/posts"}
 						startIcon={<ChevronLeftRoundedIcon />}
 						sx={{
 							mt: "0.25rem",
