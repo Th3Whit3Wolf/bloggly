@@ -170,7 +170,7 @@ const LoginForm = () => {
 						<Grid item xs={12}>
 							<FormControl fullWidth variant="outlined">
 								<InputLabel
-									htmlFor="outlined-adornment-password"
+									htmlFor="outlined-adornment-username"
 									sx={{
 										fontSize: "1.2em",
 										transition: "all 0.7s ease-out",
