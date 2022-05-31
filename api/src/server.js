@@ -78,9 +78,7 @@ app.use(express.json());
 
 /// This route shouldn't be used
 app.get("/", (req, res) => {
-	res.send(
-		'Did you mean to go to "https://bsdi1-voyager-frontend.herokuapp.com/"'
-	);
+	res.send('Did you mean to go to "https://bloggly-ui.herokuapp.com/"');
 });
 
 // Read all exported routes and use them
