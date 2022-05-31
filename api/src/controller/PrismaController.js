@@ -200,8 +200,7 @@ class PrismaController {
 			try {
 				const data = await this.dbResource.update({
 					where: { id },
-					data: body,
-					...this.queryOptions.update
+					data: body
 				});
 
 				return data
